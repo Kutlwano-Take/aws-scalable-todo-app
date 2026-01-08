@@ -1,0 +1,125 @@
+<mxfile host="app.diagrams.net" modified="2026-01-08T00:00:00Z" agent="7.0" version="20.8.3" editor="www.draw.io">
+  <diagram id="week1-arch" name="Week1 Architecture (Serverless)">
+    <mxGraphModel dx="1125" dy="677" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <!-- User -->
+        <mxCell id="user" value="User" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#dae8fc;" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="100" height="50" as="geometry"/>
+        </mxCell>
+        <!-- Route 53 (optional) -->
+        <mxCell id="r53" value="Route 53 (optional)" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#cfe2f3;" vertex="1" parent="1">
+          <mxGeometry x="170" y="120" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <!-- CloudFront -->
+        <mxCell id="cf" value="CloudFront (HTTPS via ACM)" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#fff2cc;" vertex="1" parent="1">
+          <mxGeometry x="360" y="120" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <!-- S3 Static -->
+        <mxCell id="s3" value="S3 (React SPA)" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#d5e8d4;" vertex="1" parent="1">
+          <mxGeometry x="600" y="120" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <!-- API Gateway -->
+        <mxCell id="apigw" value="API Gateway" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffe599;" vertex="1" parent="1">
+          <mxGeometry x="360" y="240" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <!-- Lambda -->
+        <mxCell id="lambda" value="Lambda (CRUD)" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffd966;" vertex="1" parent="1">
+          <mxGeometry x="600" y="240" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <!-- DynamoDB -->
+        <mxCell id="ddb" value="DynamoDB (Tasks)" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#cdeb8b;" vertex="1" parent="1">
+          <mxGeometry x="840" y="240" width="220" height="50" as="geometry"/>
+        </mxCell>
+        <!-- CloudWatch -->
+        <mxCell id="cw" value="CloudWatch Logs/Metrics" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#f8cecc;" vertex="1" parent="1">
+          <mxGeometry x="600" y="320" width="220" height="50" as="geometry"/>
+        </mxCell>
+        <!-- IAM -->
+        <mxCell id="iam" value="IAM Roles (Lambda exec, OAC)" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#e1d5e7;" vertex="1" parent="1">
+          <mxGeometry x="820" y="120" width="240" height="50" as="geometry"/>
+        </mxCell>
+        <!-- Optional VPC -->
+        <mxCell id="vpc" value="Optional VPC for private resources (subnets/SGs if used)" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;strokeColor=#999999;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="330" y="210" width="750" height="220" as="geometry"/>
+        </mxCell>
+        <!-- Cognito -->
+        <mxCell id="cognito" value="Amazon Cognito (User Pool)\nOptional for user-specific todos and authentication" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#d9ead3;" vertex="1" parent="1">
+          <mxGeometry x="360" y="320" width="220" height="70" as="geometry"/>
+        </mxCell>
+        <!-- X-Ray -->
+        <mxCell id="xray" value="AWS X-Ray (Tracing)" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#d0e0e3;" vertex="1" parent="1">
+          <mxGeometry x="840" y="320" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <!-- Edges with labels -->
+        <mxCell id="e1" edge="1" parent="1" source="user" target="r53" style="endArrow=block;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="0" as="offset"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl1" value="HTTPS" style="text;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;" vertex="1" parent="e1">
+          <mxGeometry x="0.5" y="-1" relative="1" as="geometry" width="60" height="20"/>
+        </mxCell>
+
+        <mxCell id="e1b" edge="1" parent="1" source="r53" target="cf" style="endArrow=block;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl1b" value="HTTPS" style="text;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;" vertex="1" parent="e1b">
+          <mxGeometry x="0.5" y="-1" relative="1" as="geometry" width="60" height="20"/>
+        </mxCell>
+
+        <mxCell id="e2" edge="1" parent="1" source="cf" target="s3" style="endArrow=block;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl2" value="Static Assets (OAC secured)" style="text;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;" vertex="1" parent="e2">
+          <mxGeometry x="0.5" y="-1" relative="1" as="geometry" width="160" height="20"/>
+        </mxCell>
+
+        <mxCell id="e3" edge="1" parent="1" source="cf" target="apigw" style="endArrow=block;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl3" value="HTTPS CRUD Requests" style="text;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;" vertex="1" parent="e3">
+          <mxGeometry x="0.5" y="-1" relative="1" as="geometry" width="140" height="20"/>
+        </mxCell>
+
+        <mxCell id="e4" edge="1" parent="1" source="apigw" target="lambda" style="endArrow=block;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl4" value="Invoke Functions" style="text;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;" vertex="1" parent="e4">
+          <mxGeometry x="0.5" y="-1" relative="1" as="geometry" width="120" height="20"/>
+        </mxCell>
+
+        <mxCell id="e5" edge="1" parent="1" source="lambda" target="ddb" style="endArrow=block;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl5" value="Read/Write Tasks" style="text;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;" vertex="1" parent="e5">
+          <mxGeometry x="0.5" y="-1" relative="1" as="geometry" width="120" height="20"/>
+        </mxCell>
+
+        <mxCell id="e6" edge="1" parent="1" source="lambda" target="cw" style="endArrow=block;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl6" value="Logs &amp; Metrics" style="text;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;" vertex="1" parent="e6">
+          <mxGeometry x="0.5" y="-1" relative="1" as="geometry" width="100" height="20"/>
+        </mxCell>
+
+        <!-- Cognito <-> API Gateway -->
+        <mxCell id="e7a" edge="1" parent="1" source="apigw" target="cognito" style="endArrow=block;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e7b" edge="1" parent="1" source="cognito" target="apigw" style="endArrow=block;dashed=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl7" value="Authenticate Requests" style="text;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;" vertex="1" parent="e7a">
+          <mxGeometry x="0.5" y="-1" relative="1" as="geometry" width="150" height="20"/>
+        </mxCell>
+
+        <!-- Lambda -> X-Ray -->
+        <mxCell id="e8" edge="1" parent="1" source="lambda" target="xray" style="endArrow=block;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
