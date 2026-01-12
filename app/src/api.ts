@@ -1,47 +1,88 @@
-// Mock API layer to simulate API Gateway + Lambda in Week 1/2
-// Replace with real API Gateway base URL in Week 3
+import type { Todo } from './modules/types';
 
-export type TodoDTO = {
-  id: string
-  title: string
-  completed: boolean
-  createdAt: number
-}
+const BASE_URL = 'https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod';
 
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
+export const listTodos = async (): Promise<Todo[]> => {
+  try {
+    const res = await fetch(`${BASE_URL}/todos`);
+    if (!res.ok) {
+      console.error('GET /todos failed:', res.status, await res.text());
+      return [];
+    }
+    const data = await res.json();
+    console.log('Real tasks from AWS:', data);
+    return data.map((item: any) => ({
+      id: item.id,
+      text: item.text,
+      completed: item.completed || false,
+      createdAt: item.createdAt || new Date().toISOString()
+    }));
+  } catch (err) {
+    console.error('Network error fetching todos:', err);
+    return [];
+  }
+};
 
-let memoryTodos: TodoDTO[] = []
+export const createTodo = async (text: string): Promise<Todo> => {
+  try {
+    const res = await fetch(`${BASE_URL}/todos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, completed: false })
+    });
+    if (!res.ok) {
+      console.error('POST /todos failed:', res.status, await res.text());
+      throw new Error('Failed to create task');
+    }
+    const item = await res.json();
+    console.log('Created task on AWS:', item);
+    return {
+      id: item.id,
+      text: item.text,
+      completed: item.completed || false,
+      createdAt: item.createdAt || new Date().toISOString()
+    };
+  } catch (err) {
+    console.error('Error creating todo:', err);
+    throw err;
+  }
+};
 
-export async function listTodos(): Promise<TodoDTO[]> {
-  await delay(150)
-  return structuredClone(memoryTodos)
-}
+export const toggleTodo = async (id: string): Promise<Todo> => {
+  try {
+    const res = await fetch(`${BASE_URL}/todos/${id}/toggle`, {
+      method: 'PUT',
+    });
+    if (!res.ok) {
+      console.error('PUT /todos/:id/toggle failed:', res.status, await res.text());
+      throw new Error('Failed to toggle task');
+    }
+    const item = await res.json();
+    console.log('Toggled task on AWS:', item);
+    return item;
+  } catch (err) {
+    console.error('Error toggling todo:', err);
+    throw err;
+  }
+};
 
-export async function createTodo(title: string): Promise<TodoDTO> {
-  await delay(120)
-  const todo: TodoDTO = { id: crypto.randomUUID(), title: title.trim(), completed: false, createdAt: Date.now() }
-  memoryTodos.unshift(todo)
-  return structuredClone(todo)
-}
+export const removeTodo = async (id: string): Promise<void> => {
+  try {
+    const res = await fetch(`${BASE_URL}/todos/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      console.error('DELETE /todos/:id failed:', res.status, await res.text());
+      throw new Error('Failed to delete task');
+    }
+    console.log('Deleted task on AWS:', id);
+  } catch (err) {
+    console.error('Error removing todo:', err);
+    throw err;
+  }
+};
 
-export async function toggleTodo(id: string): Promise<TodoDTO | undefined> {
-  await delay(100)
-  const idx = memoryTodos.findIndex(t => t.id === id)
-  if (idx === -1) return undefined
-  memoryTodos[idx] = { ...memoryTodos[idx], completed: !memoryTodos[idx].completed }
-  return structuredClone(memoryTodos[idx])
-}
-
-export async function removeTodo(id: string): Promise<boolean> {
-  await delay(80)
-  const before = memoryTodos.length
-  memoryTodos = memoryTodos.filter(t => t.id !== id)
-  return memoryTodos.length < before
-}
-
-export async function clearCompleted(): Promise<number> {
-  await delay(80)
-  const before = memoryTodos.length
-  memoryTodos = memoryTodos.filter(t => !t.completed)
-  return before - memoryTodos.length
-}
+export const clearCompleted = async (): Promise<void> => {
+  console.log('clearCompleted not implemented on AWS yet');
+  // TODO: Add bulk delete later
+};

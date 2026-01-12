@@ -12,10 +12,10 @@ app.get('/todos', (req, res) => {
 })
 
 app.post('/todos', (req, res) => {
-  const { title } = req.body || {}
-  const trimmed = (title || '').trim()
-  if (!trimmed) return res.status(400).json({ error: 'title required' })
-  const todo = { id: crypto.randomUUID(), title: trimmed, completed: false, createdAt: Date.now() }
+  const { text } = req.body || {}
+  const trimmed = (text || '').trim()
+  if (!trimmed) return res.status(400).json({ error: 'text required' })
+  const todo = { id: crypto.randomUUID(), text: trimmed, completed: false, createdAt: Date.now() }
   todos.unshift(todo)
   res.status(201).json(todo)
 })

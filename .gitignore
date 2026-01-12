@@ -18,3 +18,11 @@ pnpm-debug.log*
 # Editor
 .vscode/
 .idea/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+.terraform.lock.hcl
+lambda.zip
