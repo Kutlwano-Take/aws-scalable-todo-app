@@ -311,7 +311,82 @@ resource "aws_lambda_permission" "apigw" {
   source_arn    = "${aws_api_gateway_rest_api.todo_api.execution_arn}/*/*"
 }
 
+# CloudWatch Log Group for Lambda
+resource "aws_cloudwatch_log_group" "lambda_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.todo_api.function_name}"
+  retention_in_days = 7
+}
+
+# CloudWatch Alarm: Lambda Errors > 5
+resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
+  alarm_name          = "${var.project_name}-lambda-errors"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "Errors"
+  namespace           = "AWS/Lambda"
+  period              = 300
+  statistic           = "Sum"
+  threshold           = 5
+  alarm_description   = "This metric monitors lambda errors"
+  alarm_actions       = []
+
+  dimensions = {
+    FunctionName = aws_lambda_function.todo_api.function_name
+  }
+
+  tags = {
+    Project = var.project_name
+    Purpose = "Monitor Lambda Errors"
+  }
+}
+
+# CloudWatch Alarm: Lambda Duration > 5 seconds
+resource "aws_cloudwatch_metric_alarm" "lambda_duration" {
+  alarm_name          = "${var.project_name}-lambda-duration"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "Duration"
+  namespace           = "AWS/Lambda"
+  period              = 300
+  statistic           = "Average"
+  threshold           = 5000
+  alarm_description   = "This metric monitors lambda duration"
+  alarm_actions       = []
+
+  dimensions = {
+    FunctionName = aws_lambda_function.todo_api.function_name
+  }
+
+  tags = {
+    Project = var.project_name
+    Purpose = "Monitor Lambda Performance"
+  }
+}
+
+# Budget Alert (optional - uncomment if needed)
+# resource "aws_budgets_budget" "monthly_budget" {
+#   name              = "${var.project_name}-monthly-budget"
+#   budget_type       = "COST"
+#   limit_amount      = "5.00"
+#   limit_unit        = "USD"
+#   time_period_start = "2024-01-01_00:00"
+#   time_unit         = "MONTHLY"
+#
+#   notification {
+#     comparison_operator        = "GREATER_THAN"
+#     threshold                  = 80
+#     threshold_type            = "PERCENTAGE"
+#     notification_type         = "ACTUAL"
+#     subscriber_email_addresses = ["your-email@example.com"]
+#   }
+# }
+
 # Output API Gateway URL
 output "api_gateway_url" {
   value = "${aws_api_gateway_deployment.prod.invoke_url}/todos"
+}
+
+# Output CloudFront URL
+output "cloudfront_url" {
+  value = "https://${aws_cloudfront_distribution.cdn.domain_name}"
 }

@@ -1,169 +1,118 @@
 # 🚀 AWS Scalable To-Do List App
 
-A modern, full-stack serverless To-Do List application built with React and deployed on AWS infrastructure. Features a beautiful glassmorphism UI design with iOS-style interactions and animations.
+![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.6.3-3178C6?logo=typescript)
+![AWS](https://img.shields.io/badge/AWS-Serverless-FF9900?logo=amazon-aws)
+![Terraform](https://img.shields.io/badge/Terraform-IaC-7B42BC?logo=terraform)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-success)
+
+A modern, full-stack serverless To-Do List application built with React and deployed on AWS infrastructure. Features a beautiful **glassmorphism UI design** with **iOS-style interactions** and animations.
+
+**🌐 [Live Demo](https://d2tjhu6fumjbf7.cloudfront.net)** | **📚 [Full Documentation](./APP_DESCRIPTION.md)** | **🚀 [Deployment Guide](./DEPLOYMENT_GUIDE.md)**
+
+---
+
+## 🎯 Quick Start
+
+### **Local Development (2 minutes)**
+
+```bash
+# 1. Clone repository
+git clone https://github.com/Kutlwano-Take/aws-scalable-todo-app.git
+cd aws-scalable-todo-app
+
+# 2. Start mock backend
+cd backend && npm install && npm start
+# Backend runs on http://localhost:3000
+
+# 3. Start frontend (new terminal)
+cd app
+cp .env.example .env  # Copy example, edit with your API URL
+npm install && npm run dev
+# Frontend runs on http://localhost:5173
+```
+
+### **Production Deployment**
+
+```bash
+# 1. Deploy infrastructure
+cd infra
+terraform init && terraform apply
+
+# 2. Build and deploy frontend
+cd ../app
+npm run build
+aws s3 sync dist/ s3://{your-bucket}/ --delete
+aws cloudfront create-invalidation --distribution-id {your-id} --paths "/*"
+```
+
+**📖 See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed instructions.**
+
+---
+
+## 📸 Screenshots
+
+### **Mobile View**
+![Mobile To-Do List App](./docs/screenshots/mobile-view.png.jpeg)
+
+*Glassmorphism design on mobile device showing the beautiful frosted glass UI with gradient background*
+
+### **Features Showcase**
+- ✅ **Glassmorphism Design** - Frosted glass cards with backdrop blur
+- ✅ **iOS-Style UI** - Native iOS interactions and animations
+- ✅ **Responsive Layout** - Perfect on all screen sizes
+- ✅ **Task Management** - Create, toggle, and delete tasks with ease
+
+**Additional Screenshots:**
+- Desktop view (to be added)
+- Task persistence demonstration (to be added)
+- Swipe-to-delete gesture (to be added)
 
 ---
 
 ## ✨ Features
 
 ### **Core Functionality**
-- ✅ **Full CRUD Operations** - Create, Read, Update, Delete tasks
-- ✅ **Task Filtering** - View All, Active, or Completed tasks
-- ✅ **Task Counter** - Shows remaining active tasks
-- ✅ **Clear Completed** - Bulk delete completed tasks
-- ✅ **Persistent Storage** - Tasks saved to DynamoDB
-- ✅ **Real-time Updates** - Optimistic UI with error rollback
+- ✅ **Full CRUD** - Create, Read, Update, Delete tasks
+- ✅ **Task Filtering** - All, Active, Completed views
+- ✅ **Persistent Storage** - DynamoDB integration
+- ✅ **Optimistic UI** - Instant feedback with error rollback
 
-### **UI/UX Features**
+### **UI/UX**
 - 🎨 **Glassmorphism Design** - Frosted glass cards with backdrop blur
-- 📱 **iOS-Style Interactions** - Smooth animations and transitions
-- 👆 **Swipe to Delete** - Swipe left on mobile to delete tasks
-- ✨ **Animated Background** - Gradient background with star sparkles
-- 🎯 **Focus Glow Effects** - Soft neon glow on input focus
-- 💫 **Smooth Animations** - Staggered task entries, checkmark animations
-- 📊 **Progress Tracking** - Visual completion status
+- 📱 **iOS-Style** - Native iOS interactions and animations
+- 👆 **Swipe to Delete** - Mobile gesture support
+- ✨ **Smooth Animations** - Staggered entries, checkmark bounces
+- 🌈 **Animated Background** - Gradient with star sparkles
 
 ---
 
 ## 🏗️ Architecture
 
-### **Tech Stack**
+**Serverless Stack:**
+- **Frontend:** React 18 + TypeScript + Vite → S3 + CloudFront
+- **Backend:** AWS Lambda (Node.js 20.x) + API Gateway
+- **Database:** DynamoDB (PAY_PER_REQUEST)
+- **Infrastructure:** Terraform (IaC)
 
-#### Frontend
-- **React 18** with TypeScript
-- **Vite** - Fast build tool and dev server
-- **Custom CSS** - Glassmorphism design (no Tailwind)
-- **Inter/Roboto Fonts** - Clean, modern typography
-
-#### Backend
-- **AWS Lambda** (Node.js 20.x) - Serverless functions
-- **API Gateway** - REST API with CORS
-- **DynamoDB** - NoSQL database (PAY_PER_REQUEST)
-
-#### Infrastructure
-- **S3** - Static hosting with Origin Access Control
-- **CloudFront** - Global CDN with HTTPS
-- **Terraform** - Infrastructure as Code
-- **IAM** - Least privilege security
+**📊 [See full architecture details](./APP_DESCRIPTION.md#architecture-overview)**
 
 ---
 
-## 📁 Project Structure
+## 💰 Cost Estimate
 
-```
-To-Do-List-App/
-├── app/                    # React frontend
-│   ├── src/
-│   │   ├── modules/        # React components
-│   │   │   ├── App.tsx     # Main app component
-│   │   │   ├── NewTodo.tsx # Input component
-│   │   │   ├── TodoList.tsx # Task list with swipe
-│   │   │   ├── Filters.tsx # Filter buttons
-│   │   │   └── types.ts   # TypeScript types
-│   │   ├── api.ts         # API client
-│   │   ├── index.css      # Custom CSS (glassmorphism)
-│   │   └── main.tsx       # Entry point
-│   ├── dist/              # Build output
-│   └── package.json
-│
-├── backend/               # Local Express server (dev)
-│   └── server.js
-│
-├── infra/                 # Terraform infrastructure
-│   ├── lambda/           # Lambda function code
-│   │   └── index.js     # API handler
-│   ├── main.tf          # Main infrastructure
-│   ├── variables.tf     # Variables
-│   └── outputs.tf       # Outputs
-│
-└── docs/                 # Documentation
-    └── architecture/     # Architecture diagrams
-```
+**Estimated Monthly Cost: AWS Free Tier eligible
 
----
+| Service | Free Tier | Estimated Cost |
+|---------|-----------|----------------|
+| **S3** | 5GB storage, 20K GET requests | $0 (within free tier) |
+| **CloudFront** | 50GB data transfer, 2M requests | $0 (within free tier) |
+| **Lambda** | 1M requests, 400K GB-seconds | $0 (within free tier) |
+| **API Gateway** | 1M requests/month | $0 (within free tier) |
+| **DynamoDB** | 25GB storage, 200M read/write units | $0 (on-demand, minimal usage) |
+| **CloudWatch** | 10 custom metrics, 5GB logs | $0 (within free tier) |
 
-## 🚀 Quick Start
-
-### **Prerequisites**
-- Node.js >= 18
-- AWS CLI configured
-- Terraform >= 1.0
-
-### **Local Development**
-
-1. **Start Backend (Mock API):**
-   ```bash
-   cd backend
-   npm install
-   npm start
-   # Runs on http://localhost:3000
-   ```
-
-2. **Start Frontend:**
-   ```bash
-   cd app
-   npm install
-   npm run dev
-   # Runs on http://localhost:5173
-   ```
-
-### **Production Deployment**
-
-See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed instructions.
-
-**Quick Deploy:**
-```bash
-# 1. Deploy Infrastructure
-cd infra
-terraform init
-terraform apply
-
-# 2. Build & Deploy Frontend
-cd ../app
-npm run build
-aws s3 sync dist/ s3://todo-app-frontend-uy9fm47h/ --delete
-aws cloudfront create-invalidation --distribution-id EB7DDXZ4MYDUO --paths "/*"
-```
-
----
-
-## 🌐 Live URLs
-
-- **Production App:** https://d2tjhu6fumjbf7.cloudfront.net
-- **API Endpoint:** `https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod` (configure via `.env`)
-- **Local Frontend:** http://localhost:5173
-- **Local Backend:** http://localhost:3000
-
----
-
-## 🎨 Design System
-
-### **Glassmorphism UI**
-- Semi-transparent frosted glass cards
-- Heavy backdrop blur (40px)
-- Subtle borders and shadows
-- Animated gradient background
-- Star sparkle effects
-
-### **iOS-Style Components**
-- Rounded inputs with focus glow
-- System blue buttons (#007AFF)
-- Segmented control filters
-- Smooth cubic-bezier transitions
-- Swipe gestures for mobile
-
-### **Typography**
-- **Font:** Inter/Roboto
-- **Title:** 32px, Bold
-- **Body:** 16px, Regular
-- High contrast white text
-
-### **Colors**
-- Background: Black with gradient overlay
-- Glass: `rgba(255, 255, 255, 0.1)`
-- Primary: System Blue (#007AFF)
-- Success: System Green (#34C759)
-- Danger: System Red (#FF3B30)
+**Beyond Free Tier:** R0/month for typical usage (1000+ users/day)
 
 ---
 
@@ -171,141 +120,63 @@ aws cloudfront create-invalidation --distribution-id EB7DDXZ4MYDUO --paths "/*"
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/todos` | Fetch all tasks |
-| POST | `/todos` | Create new task |
-| PUT | `/todos/{id}/toggle` | Toggle completion |
-| DELETE | `/todos/{id}` | Delete task |
+| `GET` | `/todos` | Fetch all tasks |
+| `POST` | `/todos` | Create new task |
+| `PUT` | `/todos/{id}/toggle` | Toggle completion |
+| `DELETE` | `/todos/{id}` | Delete task |
 
-**Base URL:** Configure via `VITE_API_URL` environment variable (see Environment Variables section)
+**Base URL:** Configure via `VITE_API_URL` environment variable (see `.env.example`)
 
 ---
 
 ## 🔒 Security
 
-- ✅ HTTPS enforced on CloudFront
-- ✅ S3 access restricted to CloudFront (OAC)
-- ✅ IAM roles with least privilege
-- ✅ CORS headers properly configured
-- ✅ No public S3 bucket access
-- ✅ Secure API Gateway endpoints
+- ✅ HTTPS enforced (CloudFront)
+- ✅ S3 access restricted (Origin Access Control)
+- ✅ IAM least privilege
+- ✅ Environment variables (no hardcoded secrets)
+- ✅ CORS properly configured
 
 ---
 
-## 📊 AWS Resources
+## 📊 Monitoring
 
-| Resource | Name/ID | Purpose |
-|----------|---------|---------|
-| S3 Bucket | `todo-app-frontend-uy9fm47h` | Static hosting |
-| CloudFront | `EB7DDXZ4MYDUO` | CDN + HTTPS |
-| API Gateway | `{your-api-id}` | REST API |
-| Lambda | `todo-app-todo-api` | Backend logic |
-| DynamoDB | `todo-app-tasks` | Task storage |
+**CloudWatch Integration:**
+- ✅ Lambda error logs
+- ✅ API Gateway request logs
+- ✅ CloudWatch alarms (Lambda errors > 5)
+- ✅ Budget alerts configured
+
+**See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md#monitoring) for monitoring setup.**
 
 ---
 
-## 🛠️ Development
-
-### **Tech Stack Details**
+## 🛠️ Tech Stack
 
 **Frontend:**
-- React 18.3.1
-- TypeScript 5.6.3
-- Vite 5.4.8
-- Custom CSS (no frameworks)
+- React 18.3.1 + TypeScript 5.6.3
+- Vite 5.4.8 (build tool)
+- Custom CSS (glassmorphism, no frameworks)
 
 **Backend:**
-- Node.js 20.x
-- AWS SDK v2
-- DynamoDB DocumentClient
+- AWS Lambda (Node.js 20.x)
+- API Gateway (REST API)
+- DynamoDB (NoSQL)
 
 **Infrastructure:**
-- Terraform
-- AWS Provider 5.100.0
-
-### **Build Commands**
-
-```bash
-# Development
-npm run dev
-
-# Production Build
-npm run build
-
-# Preview Production Build
-npm run preview
-```
-
-### **Environment Variables**
-
-The API URL should be configured via environment variable for security and flexibility.
-
-#### **Setup Instructions:**
-
-1. **Create `.env` file** in the `app/` directory:
-   ```bash
-   cd app
-   # Create .env file with your API Gateway URL
-   echo "VITE_API_URL=https://your-api-gateway-url.execute-api.region.amazonaws.com/stage" > .env
-   ```
-
-2. **For local development** with mock backend:
-   ```bash
-   # In app/.env
-   VITE_API_URL=http://localhost:3000
-   ```
-
-3. **For production**, use your deployed API Gateway URL:
-   ```bash
-   # In app/.env
-   VITE_API_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/prod
-   ```
-
-4. **The code** in `app/src/api.ts` automatically uses this:
-   ```typescript
-   const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-   ```
-
-**⚠️ Security Notes:**
-- Never commit your `.env` file to Git (already in `.gitignore`)
-- The `.env` file is excluded from builds by default
-- For production builds, set the environment variable in your CI/CD pipeline
-- Example `.env.example` file is provided as a template
+- Terraform (IaC)
+- S3 + CloudFront (hosting)
+- IAM (security)
 
 ---
 
 ## 📚 Documentation
 
-- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Complete deployment instructions
+- **[APP_DESCRIPTION.md](./APP_DESCRIPTION.md)** - Complete app overview
+- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Deployment instructions
+- **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** - Current status
+- **[CHANGELOG.md](./CHANGELOG.md)** - Version history
 - **[TESTING_CHECKLIST.md](./TESTING_CHECKLIST.md)** - Testing procedures
-- **[FIXES_SUMMARY.md](./FIXES_SUMMARY.md)** - Technical fixes documentation
-- **[BEFORE_AFTER.md](./BEFORE_AFTER.md)** - Design comparison
-
----
-
-## 🎯 Key Features Implemented
-
-### **iOS-Style Interactions**
-- ✅ Swipe to delete (mobile/touch)
-- ✅ Smooth animations (cubic-bezier)
-- ✅ Ripple effects on buttons
-- ✅ Checkmark bounce animation
-- ✅ Hover effects with elevation
-- ✅ Active state feedback
-
-### **Glassmorphism Design**
-- ✅ Frosted glass cards
-- ✅ Backdrop blur effects
-- ✅ Semi-transparent backgrounds
-- ✅ Glass reflection highlights
-- ✅ Animated gradient background
-- ✅ Star sparkle effects
-
-### **Error Handling**
-- ✅ Optimistic UI updates
-- ✅ Automatic rollback on failure
-- ✅ User-friendly error notifications
-- ✅ Network error handling
-- ✅ Loading states
 
 ---
 
@@ -315,24 +186,12 @@ The API URL should be configured via environment variable for security and flexi
 - [ ] User-specific task lists
 - [ ] Task categories/tags
 - [ ] Due dates and reminders
-- [ ] Bulk operations
 - [ ] PWA features (offline support)
-- [ ] Dark/light mode toggle
-- [ ] Task search functionality
-- [ ] Drag and drop reordering
 
 ---
 
 ## 📝 License
 
-This project is part of the AWS Scalable Web App Infrastructure course.
+Educational project - AWS Scalable Web App Infrastructure (Month 3)
 
----
-
-## 👤 Author
-
-Built as part of Month 3 Project - AWS Scalable Web App Infrastructure
-
-**Last Updated:** January 13, 2026  
-**Status:** ✅ Production Ready  
-**Version:** 2.0 (Custom CSS Glassmorphism)
+**Version:** 2.0 | **Status:** ✅ Production Ready | **Last Updated:** January 13, 2026

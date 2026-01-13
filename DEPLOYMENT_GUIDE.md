@@ -72,7 +72,7 @@ This enables all paths like:
 ```tsx
 const handleToggle = (id: string) => {
   setTodos((prev) => prev.map(...));
-  toggleTodo(id); // Not awaited!
+  toggleTodo(id); 
 };
 ```
 
@@ -80,12 +80,12 @@ const handleToggle = (id: string) => {
 ```tsx
 const handleToggle = async (id: string) => {
   const previousTodos = [...todos];
-  setTodos((prev) => prev.map(...)); // Optimistic update
+  setTodos((prev) => prev.map(...)); 
   
   try {
     await toggleTodo(id);
   } catch (err) {
-    setTodos(previousTodos); // Rollback on error
+    setTodos(previousTodos); 
     setError("Failed to update task.");
   }
 };
@@ -173,7 +173,7 @@ export const removeTodo = async (id: string): Promise<void> => { ... }
 
 5. **Deploy API Gateway (to activate new routes):**
    ```powershell
-   # Get your API Gateway ID from Terraform output
+  
    aws apigateway create-deployment --rest-api-id {your-api-id} --stage-name prod --region us-east-1
    ```
    
@@ -195,8 +195,7 @@ export const removeTodo = async (id: string): Promise<void> => { ... }
 
 3. **Configure API URL (if not using default):**
    ```powershell
-   # Create .env file with your API Gateway URL
-   # Get the URL from Terraform outputs or AWS Console
+
    echo "VITE_API_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/prod" > .env
    ```
    
@@ -261,6 +260,28 @@ export const removeTodo = async (id: string): Promise<void> => { ... }
 | API Gateway | `{your-api-id}` | REST API (get from Terraform outputs) |
 | Lambda | `todo-app-todo-api` | Backend logic |
 | DynamoDB | `todo-app-tasks` | Persistent storage |
+
+---
+
+## 📊 Monitoring & Alarms
+
+### **CloudWatch Alarms**
+- ✅ **Lambda Errors Alarm** - Triggers when errors > 5 in 5 minutes
+- ✅ **Lambda Duration Alarm** - Triggers when average duration > 5 seconds
+- ✅ **Log Groups** - 7-day retention for Lambda logs
+- ✅ **Metrics** - Automatic metrics for Lambda, API Gateway, DynamoDB
+
+### **Viewing Alarms:**
+```powershell
+# List alarms
+aws cloudwatch describe-alarms --alarm-name-prefix todo-app
+
+# View Lambda logs
+aws logs tail /aws/lambda/todo-app-todo-api --follow --region us-east-1
+```
+
+### **Budget Alerts (Optional)**
+Budget alerts can be configured in Terraform (commented out by default). Uncomment the `aws_budgets_budget` resource in `infra/main.tf` and set your email address.
 
 ---
 
