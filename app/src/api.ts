@@ -1,6 +1,7 @@
 import type { Todo } from './modules/types';
 
-const BASE_URL = 'https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod';
+// Get API URL from environment variable, fallback to localhost for development
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export const listTodos = async (): Promise<Todo[]> => {
   try {

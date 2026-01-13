@@ -67,11 +67,13 @@ After deploying all fixes, follow this checklist to verify everything works.
 
 ### Test API Directly (using browser console or Postman)
 
-**Base URL:** `https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod`
+**Base URL:** `https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod`  
+**Note:** Replace `{your-api-id}` with your actual API Gateway ID from Terraform outputs or AWS Console.
 
 ### 1. **GET /todos** ✅
 ```javascript
-fetch('https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod/todos')
+// Replace {your-api-id} with your actual API Gateway ID
+fetch('https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod/todos')
   .then(r => r.json())
   .then(console.log)
 ```
@@ -79,7 +81,8 @@ fetch('https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod/todos')
 
 ### 2. **POST /todos** ✅
 ```javascript
-fetch('https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod/todos', {
+// Replace {your-api-id} with your actual API Gateway ID
+fetch('https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod/todos', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ text: 'API test task', completed: false })
@@ -91,8 +94,8 @@ fetch('https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod/todos', {
 
 ### 3. **PUT /todos/{id}/toggle** ✅
 ```javascript
-// Replace {id} with actual task ID
-fetch('https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod/todos/1234567890/toggle', {
+// Replace {your-api-id} and {id} with actual values
+fetch('https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod/todos/{id}/toggle', {
   method: 'PUT'
 })
   .then(r => r.json())
@@ -102,8 +105,8 @@ fetch('https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod/todos/1234567
 
 ### 4. **DELETE /todos/{id}** ✅
 ```javascript
-// Replace {id} with actual task ID
-fetch('https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod/todos/1234567890', {
+// Replace {your-api-id} and {id} with actual values
+fetch('https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod/todos/{id}', {
   method: 'DELETE'
 })
   .then(r => r.json())
@@ -130,7 +133,8 @@ fetch('https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod/todos/1234567
    ```
 2. Check API Gateway stage:
    ```powershell
-   aws apigateway get-stage --rest-api-id xydj5lg2h6 --stage-name prod
+   # Replace {your-api-id} with your actual API Gateway ID
+   aws apigateway get-stage --rest-api-id {your-api-id} --stage-name prod
    ```
 
 ### **Tasks Not Persisting?**

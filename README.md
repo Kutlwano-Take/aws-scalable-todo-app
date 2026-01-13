@@ -130,7 +130,7 @@ aws cloudfront create-invalidation --distribution-id EB7DDXZ4MYDUO --paths "/*"
 ## 🌐 Live URLs
 
 - **Production App:** https://d2tjhu6fumjbf7.cloudfront.net
-- **API Endpoint:** https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod
+- **API Endpoint:** `https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod` (configure via `.env`)
 - **Local Frontend:** http://localhost:5173
 - **Local Backend:** http://localhost:3000
 
@@ -176,7 +176,7 @@ aws cloudfront create-invalidation --distribution-id EB7DDXZ4MYDUO --paths "/*"
 | PUT | `/todos/{id}/toggle` | Toggle completion |
 | DELETE | `/todos/{id}` | Delete task |
 
-**Base URL:** `https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod`
+**Base URL:** Configure via `VITE_API_URL` environment variable (see Environment Variables section)
 
 ---
 
@@ -197,7 +197,7 @@ aws cloudfront create-invalidation --distribution-id EB7DDXZ4MYDUO --paths "/*"
 |----------|---------|---------|
 | S3 Bucket | `todo-app-frontend-uy9fm47h` | Static hosting |
 | CloudFront | `EB7DDXZ4MYDUO` | CDN + HTTPS |
-| API Gateway | `xydj5lg2h6` | REST API |
+| API Gateway | `{your-api-id}` | REST API |
 | Lambda | `todo-app-todo-api` | Backend logic |
 | DynamoDB | `todo-app-tasks` | Task storage |
 
@@ -237,10 +237,39 @@ npm run preview
 
 ### **Environment Variables**
 
-No environment variables needed - API URL is hardcoded in `app/src/api.ts`:
-```typescript
-const BASE_URL = 'https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod';
-```
+The API URL should be configured via environment variable for security and flexibility.
+
+#### **Setup Instructions:**
+
+1. **Create `.env` file** in the `app/` directory:
+   ```bash
+   cd app
+   # Create .env file with your API Gateway URL
+   echo "VITE_API_URL=https://your-api-gateway-url.execute-api.region.amazonaws.com/stage" > .env
+   ```
+
+2. **For local development** with mock backend:
+   ```bash
+   # In app/.env
+   VITE_API_URL=http://localhost:3000
+   ```
+
+3. **For production**, use your deployed API Gateway URL:
+   ```bash
+   # In app/.env
+   VITE_API_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/prod
+   ```
+
+4. **The code** in `app/src/api.ts` automatically uses this:
+   ```typescript
+   const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+   ```
+
+**⚠️ Security Notes:**
+- Never commit your `.env` file to Git (already in `.gitignore`)
+- The `.env` file is excluded from builds by default
+- For production builds, set the environment variable in your CI/CD pipeline
+- Example `.env.example` file is provided as a template
 
 ---
 

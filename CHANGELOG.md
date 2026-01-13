@@ -30,13 +30,24 @@ All notable changes to the To-Do List App project.
 - ✅ iOS segmented control filters
 - ✅ Smooth cubic-bezier animations
 
+### 🔒 Security Improvements
+- ✅ **Removed hardcoded API URL** from source code
+- ✅ **Environment variable support** via `VITE_API_URL`
+- ✅ **Fallback to localhost** for local development
+- ✅ **Created `.env.example`** template file
+- ✅ **Updated all documentation** to use placeholders
+- ✅ **Removed API Gateway ID** from public documentation
+
 ### 🐛 Bug Fixes
 - ✅ Fixed error in `App.tsx` line 164: Changed `onRemove` to `handleRemove`
 - ✅ All linter errors resolved
 
 ### 📚 Documentation Updates
-- ✅ Updated `README.md` with current tech stack
-- ✅ Updated `DEPLOYMENT_GUIDE.md` with design system info
+- ✅ Updated `README.md` with current tech stack and environment variable setup
+- ✅ Updated `DEPLOYMENT_GUIDE.md` with design system info and API URL configuration
+- ✅ Updated `PROJECT_STATUS.md` - Removed hardcoded API URLs
+- ✅ Updated `FIXES_SUMMARY.md` - Replaced API URLs with placeholders
+- ✅ Updated `TESTING_CHECKLIST.md` - Replaced API URLs with placeholders
 - ✅ Created `PROJECT_STATUS.md` - Complete status report
 - ✅ Created `CHANGELOG.md` - This file
 
@@ -107,6 +118,21 @@ All notable changes to the To-Do List App project.
 ### **Breaking Changes**
 - None - All functionality preserved
 - UI design updated but features remain the same
+
+### **Environment Variable Migration**
+If you're upgrading from a previous version with hardcoded API URLs:
+
+1. Create `.env` file in `app/` directory:
+   ```bash
+   VITE_API_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/prod
+   ```
+
+2. For local development:
+   ```bash
+   VITE_API_URL=http://localhost:3000
+   ```
+
+3. The app will automatically use the environment variable or fallback to localhost.
 
 ---
 

@@ -264,16 +264,19 @@ export const removeTodo = async (id: string): Promise<void> => { ... }
 
 ### API Tests (via curl/fetch):
 ```bash
+# Replace {your-api-url} with your actual API Gateway URL
+# Get it from Terraform outputs or AWS Console
+
 # Toggle task
-curl -X PUT https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod/todos/123/toggle
+curl -X PUT https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod/todos/123/toggle
 ✅ Response: Updated task with flipped completed status
 
 # Delete task
-curl -X DELETE https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod/todos/123
+curl -X DELETE https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod/todos/123
 ✅ Response: Success message
 
 # Get all tasks
-curl https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod/todos
+curl https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod/todos
 ✅ Response: Array of tasks
 ```
 

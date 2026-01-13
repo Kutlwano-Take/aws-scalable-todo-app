@@ -173,8 +173,11 @@ export const removeTodo = async (id: string): Promise<void> => { ... }
 
 5. **Deploy API Gateway (to activate new routes):**
    ```powershell
-   aws apigateway create-deployment --rest-api-id xydj5lg2h6 --stage-name prod --region us-east-1
+   # Get your API Gateway ID from Terraform output
+   aws apigateway create-deployment --rest-api-id {your-api-id} --stage-name prod --region us-east-1
    ```
+   
+   **Note:** Replace `{your-api-id}` with your actual API Gateway ID from Terraform outputs.
 
 ---
 
@@ -190,17 +193,30 @@ export const removeTodo = async (id: string): Promise<void> => { ... }
    npm install
    ```
 
-3. **Build production bundle:**
+3. **Configure API URL (if not using default):**
+   ```powershell
+   # Create .env file with your API Gateway URL
+   # Get the URL from Terraform outputs or AWS Console
+   echo "VITE_API_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/prod" > .env
+   ```
+   
+   **Note:** For production builds, the API URL can also be set via environment variable during build:
+   ```powershell
+   $env:VITE_API_URL="https://your-api-id.execute-api.us-east-1.amazonaws.com/prod"
+   npm run build
+   ```
+
+4. **Build production bundle:**
    ```powershell
    npm run build
    ```
 
-4. **Upload to S3:**
+5. **Upload to S3:**
    ```powershell
    aws s3 sync dist/ s3://todo-app-frontend-uy9fm47h/ --delete
    ```
 
-5. **Invalidate CloudFront cache:**
+6. **Invalidate CloudFront cache:**
    ```powershell
    aws cloudfront create-invalidation --distribution-id EB7DDXZ4MYDUO --paths "/*"
    ```
@@ -210,7 +226,9 @@ export const removeTodo = async (id: string): Promise<void> => { ... }
 ## 🌐 Live URLs
 
 - **Production App:** https://d2tjhu6fumjbf7.cloudfront.net
-- **API Endpoint:** https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod
+- **API Endpoint:** `https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod`
+  
+  **Note:** Replace `{your-api-id}` with your actual API Gateway ID. Get it from Terraform outputs or AWS Console.
 - **Local Frontend:** http://localhost:5173
 - **Local Backend:** http://localhost:3000
 
@@ -240,7 +258,7 @@ export const removeTodo = async (id: string): Promise<void> => { ... }
 |----------|---------|---------|
 | S3 Bucket | `todo-app-frontend-uy9fm47h` | Static hosting |
 | CloudFront | `EB7DDXZ4MYDUO` | CDN + HTTPS |
-| API Gateway | `xydj5lg2h6` | REST API |
+| API Gateway | `{your-api-id}` | REST API (get from Terraform outputs) |
 | Lambda | `todo-app-todo-api` | Backend logic |
 | DynamoDB | `todo-app-tasks` | Persistent storage |
 

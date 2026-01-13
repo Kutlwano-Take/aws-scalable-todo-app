@@ -89,7 +89,7 @@
 | DELETE | `/todos/{id}` | ✅ Working | Delete task |
 | OPTIONS | `/todos` | ✅ Working | CORS preflight |
 
-**Base URL:** `https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod`
+**Base URL:** Configure via `VITE_API_URL` environment variable (see README.md)
 
 ---
 
@@ -97,12 +97,12 @@
 
 ### **Production URLs**
 - **App:** https://d2tjhu6fumjbf7.cloudfront.net ✅
-- **API:** https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod ✅
+- **API:** `https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod` ✅ (configure via `.env`)
 
 ### **AWS Resources**
 - **S3 Bucket:** `todo-app-frontend-uy9fm47h` ✅
 - **CloudFront:** `EB7DDXZ4MYDUO` ✅
-- **API Gateway:** `xydj5lg2h6` ✅
+- **API Gateway:** `{your-api-id}` ✅ (get from Terraform outputs)
 - **Lambda:** `todo-app-todo-api` ✅
 - **DynamoDB:** `todo-app-tasks` ✅
 

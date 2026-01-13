@@ -34,29 +34,28 @@
 ```tsx
 ❌ const handleToggle = (id: string) => {
   setTodos(prev => prev.map(...));
-  toggleTodo(id); // Fire and forget - no await!
+  toggleTodo(id); 
 };
 
 ❌ const handleRemove = (id: string) => {
   setTodos(prev => prev.filter(...));
-  removeTodo(id); // Fire and forget - no await!
+  removeTodo(id); 
 };
 ```
 
 **TodoList.tsx:**
 ```tsx
-❌ <span>{t.title}</span>  // Backend sends "text", not "title"!
+❌ <span>{t.title}</span>  
 ```
 
 **Lambda (index.js):**
 ```javascript
-❌ // Only handles GET and POST
+❌ 
 if (path === '/todos') {
   if (httpMethod === 'GET') { ... }
   if (httpMethod === 'POST') { ... }
 }
-// ❌ No PUT /todos/{id}/toggle handler
-// ❌ No DELETE /todos/{id} handler
+
 ```
 
 **Terraform (main.tf):**
@@ -102,13 +101,13 @@ resource "aws_api_gateway_resource" "todos" {
 ```tsx
 ✅ const handleToggle = async (id: string) => {
   const previousTodos = [...todos];
-  setTodos(prev => prev.map(...)); // Optimistic update
+  setTodos(prev => prev.map(...)); 
   
   try {
-    await toggleTodo(id); // Properly await!
+    await toggleTodo(id); 
     setError(null);
   } catch (err) {
-    setTodos(previousTodos); // Rollback on error
+    setTodos(previousTodos); 
     setError("Failed to update task. Please try again.");
     setTimeout(() => setError(null), 3000);
   }
@@ -119,10 +118,10 @@ resource "aws_api_gateway_resource" "todos" {
   setTodos(prev => prev.filter(...));
   
   try {
-    await removeTodo(id); // Properly await!
+    await removeTodo(id); 
     setError(null);
   } catch (err) {
-    setTodos(previousTodos); // Rollback on error
+    setTodos(previousTodos); 
     setError("Failed to delete task. Please try again.");
     setTimeout(() => setError(null), 3000);
   }
@@ -138,7 +137,7 @@ resource "aws_api_gateway_resource" "todos" {
 
 **TodoList.tsx:**
 ```tsx
-✅ <span>{t.text}</span>  // Matches backend property!
+✅ <span>{t.text}</span>  
 ```
 
 **Lambda (index.js):**
@@ -384,9 +383,39 @@ try {
 
 ---
 
+## 🔒 Security Improvements (January 13, 2026)
+
+### **API URL Configuration**
+
+#### **Before:**
+```typescript
+❌ const BASE_URL = 'https://your-api-id.execute-api.us-east-1.amazonaws.com/prod';
+```
+- Hardcoded API Gateway URL in source code
+- Visible in GitHub repository
+- Same URL for all environments
+- Security risk if repository is public
+
+#### **After:**
+```typescript
+✅ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+```
+- Environment variable configuration
+- No hardcoded URLs in source code
+- Different URLs for dev/staging/prod
+- Secure and flexible
+
+### **Documentation Updates:**
+- ✅ Removed all hardcoded API URLs from documentation
+- ✅ Added environment variable setup instructions
+- ✅ Created `.env.example` template
+- ✅ Updated all examples to use placeholders
+
+---
+
 ## 🎉 Final Result
 
-**Status:** ✅ FULLY OPERATIONAL
+**Status:** ✅ FULLY OPERATIONAL & SECURE
 
 The To-Do List App now works exactly as intended:
 - ✅ Create tasks → Saved to DynamoDB
@@ -396,10 +425,14 @@ The To-Do List App now works exactly as intended:
 - ✅ Error handling → User-friendly notifications
 - ✅ Rollback mechanism → Prevents inconsistent state
 - ✅ Type safety → Catches bugs at compile time
+- ✅ Secure configuration → Environment variables for API URLs
+- ✅ No exposed credentials → All sensitive data in `.env` (gitignored)
 
 **Deployment:** All changes live at https://d2tjhu6fumjbf7.cloudfront.net
 
 ---
 
 **Summary Created:** January 12, 2026  
-**All Issues:** ✅ RESOLVED
+**Security Update:** January 13, 2026  
+**All Issues:** ✅ RESOLVED  
+**Security:** ✅ HARDENED
