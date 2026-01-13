@@ -1,13 +1,21 @@
 /* Import Inter font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Base Styles - Modern Dark Glassmorphism */
-body {
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
   font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   background: #000000;
   color: #ffffff;
@@ -15,53 +23,527 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-/* Enhanced Glassmorphism backdrop blur */
-.backdrop-blur-2xl {
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-}
-
-.backdrop-blur-xl {
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-}
-
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px) saturate(180%);
-  -webkit-backdrop-filter: blur(4px) saturate(180%);
-}
-
-/* Glass reflection effect */
-.glass-reflection {
   position: relative;
 }
 
-.glass-reflection::before {
+/* ============================================
+   GLASSMORPHISM BACKGROUND
+   ============================================ */
+.app-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  opacity: 0.3;
+}
+
+.app-background::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+}
+
+/* Star sparkles */
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+/* ============================================
+   MAIN CONTAINER
+   ============================================ */
+.app-container {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.app-wrapper {
+  width: 100%;
+  max-width: 800px;
+}
+
+/* ============================================
+   GLASSMORPHISM CARD
+   ============================================ */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  position: relative;
+}
+
+.glass-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  opacity: 0.5;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
 }
 
+.glass-card-content {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+.app-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.app-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+}
+
+/* ============================================
+   INPUT BAR (iOS Style)
+   ============================================ */
+.input-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.input-field {
+  flex: 1;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.input-field::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.input-field:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 0 0 4px rgba(255, 255, 255, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.input-field:hover:not(:focus) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.add-button {
+  padding: 14px 28px;
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.add-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.add-button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.add-button:hover {
+  background: #0051D5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 122, 255, 0.4);
+}
+
+.add-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.add-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================
+   TASK LIST
+   ============================================ */
+.task-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 200px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  animation: slideIn 0.4s ease-out backwards;
+}
+
+.task-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: linear-gradient(90deg, rgba(0, 122, 255, 0.2), transparent);
+  transition: width 0.3s ease;
+}
+
+.task-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.task-item:hover::before {
+  width: 4px;
+}
+
+.task-item:active {
+  transform: translateX(2px) scale(0.99);
+}
+
+.task-item.swiping {
+  transition: none;
+}
+
+/* Swipe to delete indicator */
+.task-item[style*="translateX(-"]::after {
+  content: 'Delete';
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #FF3B30;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* iOS Checkbox */
+.task-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.task-checkbox:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.task-checkbox:checked {
+  background: #34C759;
+  border-color: #34C759;
+  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.2);
+}
+
+.task-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  animation: checkmark 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.task-text {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 400;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  word-break: break-word;
+}
+
+.task-item.completed .task-text {
+  text-decoration: line-through;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.task-delete {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 59, 48, 0.1);
+  color: rgba(255, 59, 48, 0.8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.task-item:hover .task-delete {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.task-delete:hover {
+  background: rgba(255, 59, 48, 0.2);
+  color: #FF3B30;
+  transform: scale(1.1);
+}
+
+.task-delete:active {
+  transform: scale(0.95);
+}
+
+.task-delete svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   FILTERS (iOS Segmented Control Style)
+   ============================================ */
+.filters-container {
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filter-button {
+  flex: 1;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.filter-button.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.filter-button:hover:not(.active) {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.filter-button:active {
+  transform: scale(0.98);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.app-footer {
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-counter {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+}
+
+.clear-button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.clear-button:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.clear-button:active {
+  transform: scale(0.98);
+}
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 20px;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #007AFF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state {
+  text-align: center;
+  padding: 64px 20px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+}
+
+/* ============================================
+   ERROR NOTIFICATION
+   ============================================ */
+.error-notification {
+  background: rgba(255, 59, 48, 0.1);
+  border: 1px solid rgba(255, 59, 48, 0.3);
+  color: #FF3B30;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: slideDown 0.3s ease-out;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
   }
-  to {
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1.2);
   }
 }
 
@@ -87,164 +569,88 @@ body {
   }
 }
 
-@keyframes scaleIn {
+@keyframes checkmark {
   from {
-    transform: scale(0);
+    transform: rotate(45deg) scale(0);
   }
   to {
-    transform: scale(1);
+    transform: rotate(45deg) scale(1);
   }
 }
 
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) scale(1);
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 640px) {
+  .app-container {
+    padding: 16px;
   }
-  50% {
-    transform: translateY(-20px) scale(1.05);
-  }
-}
 
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-    opacity: 0;
+  .glass-card-content {
+    padding: 24px;
+    gap: 20px;
   }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-}
 
-@keyframes twinkle {
-  0%, 100% {
-    opacity: 0.2;
-    transform: scale(1);
+  .app-title {
+    font-size: 28px;
   }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.2);
+
+  .input-container {
+    flex-direction: column;
+  }
+
+  .add-button {
+    width: 100%;
   }
 }
 
-/* Apply Animations */
-.animate-fadeIn {
-  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+/* ============================================
+   iOS STYLE ENHANCEMENTS
+   ============================================ */
+/* Smooth scrolling */
+* {
+  -webkit-overflow-scrolling: touch;
 }
 
-.animate-slideIn {
-  animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
+/* Tap highlight */
+button, a, input {
+  -webkit-tap-highlight-color: rgba(0, 122, 255, 0.2);
 }
 
-.animate-slideDown {
-  animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+/* Selection */
+::selection {
+  background: rgba(0, 122, 255, 0.3);
+  color: white;
 }
 
-.animate-scaleIn {
-  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+/* Focus outline */
+*:focus-visible {
+  outline: 2px solid #007AFF;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient 4s ease infinite;
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  position: relative;
-  overflow: hidden;
-}
-
-.animate-shimmer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  animation: shimmer 3s infinite;
-}
-
-.animate-twinkle {
-  animation: twinkle 3s ease-in-out infinite;
-}
-
-/* Custom Scrollbar */
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.4);
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.6);
-}
-
-/* Smooth Transitions */
-* {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-/* Focus Styles */
-*:focus {
-  outline: none;
-}
-
-/* Selection Styles */
-::selection {
-  background-color: rgba(168, 85, 247, 0.3);
-  color: white;
-}
-
-/* Prevent text selection on buttons */
-button {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-/* Improve font rendering */
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Input autofill styles */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus {
-  -webkit-text-fill-color: white;
-  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.05) inset;
-  transition: background-color 5000s ease-in-out 0s;
+  background: rgba(255, 255, 255, 0.3);
 }

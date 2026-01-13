@@ -1,105 +1,309 @@
-# To-Do List App – Week 1 (Architecture & Planning)
+# 🚀 AWS Scalable To-Do List App
 
-This repository contains the Week 1 deliverables and initial scaffold for a React-based To‑Do List application that will be deployed on AWS as part of the "AWS Scalable Web App Infrastructure" project.
+A modern, full-stack serverless To-Do List application built with React and deployed on AWS infrastructure. Features a beautiful glassmorphism UI design with iOS-style interactions and animations.
 
-According to the Month 3 Project Brief (Week 1 — Phase 1: Architecture Design & Planning), the required deliverables are:
+---
 
-- Select application architecture (monolith, microservices, or serverless)
-- Create an architecture diagram
-- Identify AWS services (e.g., EC2, ALB, S3, CloudFront, RDS, DynamoDB)
-- Define networking and security requirements (VPC, subnets, security groups/NACLs, IAM)
-- Describe the workflow of the system end to end
+## ✨ Features
 
-This README documents those items and links to artifacts in the repo.
+### **Core Functionality**
+- ✅ **Full CRUD Operations** - Create, Read, Update, Delete tasks
+- ✅ **Task Filtering** - View All, Active, or Completed tasks
+- ✅ **Task Counter** - Shows remaining active tasks
+- ✅ **Clear Completed** - Bulk delete completed tasks
+- ✅ **Persistent Storage** - Tasks saved to DynamoDB
+- ✅ **Real-time Updates** - Optimistic UI with error rollback
 
-## 1) Architecture Selection
+### **UI/UX Features**
+- 🎨 **Glassmorphism Design** - Frosted glass cards with backdrop blur
+- 📱 **iOS-Style Interactions** - Smooth animations and transitions
+- 👆 **Swipe to Delete** - Swipe left on mobile to delete tasks
+- ✨ **Animated Background** - Gradient background with star sparkles
+- 🎯 **Focus Glow Effects** - Soft neon glow on input focus
+- 💫 **Smooth Animations** - Staggered task entries, checkmark animations
+- 📊 **Progress Tracking** - Visual completion status
 
-Selected: Serverless for auto-scaling and cost‑efficiency; monolith/ECS fallback if needed.
+---
 
-Rationale:
-- Serverless aligns with AWS best practices for simple apps, reducing ops overhead (no servers to manage).
-- Built-in scaling and pay-per-use model fits a lightweight To‑Do app.
-- Clear evolution path: can be extended with additional managed services or decomposed if requirements grow.
+## 🏗️ Architecture
 
-Initial deployment choices for Month 3 trajectory:
-- Frontend: React SPA, hosted on S3 with CloudFront (global CDN, HTTPS via ACM)
-- Backend API: AWS Lambda behind Amazon API Gateway (Node.js runtime)
-- Database: DynamoDB (serverless NoSQL for task items)
+### **Tech Stack**
 
-Fallback path (only if constraints arise): Containerized Node/Express on AWS Fargate (ECS) behind an ALB with RDS.
+#### Frontend
+- **React 18** with TypeScript
+- **Vite** - Fast build tool and dev server
+- **Custom CSS** - Glassmorphism design (no Tailwind)
+- **Inter/Roboto Fonts** - Clean, modern typography
 
-## 2) Architecture Diagram
+#### Backend
+- **AWS Lambda** (Node.js 20.x) - Serverless functions
+- **API Gateway** - REST API with CORS
+- **DynamoDB** - NoSQL database (PAY_PER_REQUEST)
 
-See: docs/architecture/Week1-ToDo-Architecture.drawio (source) and docs/architecture/Week1-ToDo-Architecture.png (export).
+#### Infrastructure
+- **S3** - Static hosting with Origin Access Control
+- **CloudFront** - Global CDN with HTTPS
+- **Terraform** - Infrastructure as Code
+- **IAM** - Least privilege security
 
-High-level components:
-- User -> Route 53 (optional) -> CloudFront (HTTPS via ACM) -> S3 (static SPA)
-- SPA -> API Gateway -> Lambda (CRUD functions) -> DynamoDB
-- Observability: CloudWatch Logs/Metrics; X-Ray optional
-- IAM roles: Lambda execution role (CloudWatch, DynamoDB), CloudFront OAC for S3, least privilege
-- VPC: Not required for core serverless path; may be introduced later for private resources as needed
+---
 
-## 3) AWS Services Identified
+## 📁 Project Structure
 
-- Edge/Static: Amazon CloudFront, AWS Certificate Manager (ACM), Amazon S3 (static hosting), Route 53 (optional for custom domain)
-- API/Compute: Amazon API Gateway (HTTP/REST), AWS Lambda (Node.js)
-- Data: Amazon DynamoDB (tasks table)
-- IAM: Roles and policies for Lambda execution (DynamoDB, CloudWatch), S3 access for CloudFront OAC, CI/CD roles
-- Monitoring: Amazon CloudWatch (logs, metrics, dashboards, alarms)
-- Optional innovation: Amazon Cognito for user authentication and authorization
+```
+To-Do-List-App/
+├── app/                    # React frontend
+│   ├── src/
+│   │   ├── modules/        # React components
+│   │   │   ├── App.tsx     # Main app component
+│   │   │   ├── NewTodo.tsx # Input component
+│   │   │   ├── TodoList.tsx # Task list with swipe
+│   │   │   ├── Filters.tsx # Filter buttons
+│   │   │   └── types.ts   # TypeScript types
+│   │   ├── api.ts         # API client
+│   │   ├── index.css      # Custom CSS (glassmorphism)
+│   │   └── main.tsx       # Entry point
+│   ├── dist/              # Build output
+│   └── package.json
+│
+├── backend/               # Local Express server (dev)
+│   └── server.js
+│
+├── infra/                 # Terraform infrastructure
+│   ├── lambda/           # Lambda function code
+│   │   └── index.js     # API handler
+│   ├── main.tf          # Main infrastructure
+│   ├── variables.tf     # Variables
+│   └── outputs.tf       # Outputs
+│
+└── docs/                 # Documentation
+    └── architecture/     # Architecture diagrams
+```
 
-## 4) Networking & Security Requirements
+---
 
-- Core serverless path minimizes VPC usage:
-  - API Gateway and Lambda do not require a VPC by default for DynamoDB access
-  - If private resources are added later, place them in a VPC and configure Lambda ENIs/subnets/security groups
-- Security best practices:
-  - CloudFront with ACM-issued TLS certificate for HTTPS
-  - S3 bucket private with CloudFront Origin Access Control (OAC)
-  - IAM least privilege for Lambda: scoped permissions to specific DynamoDB table and CloudWatch logging
-  - API Gateway Cognito authorizers (if Cognito is integrated for secure authenticated endpoints)
-  - Optional WAF on CloudFront for basic protections
-- Optional VPC design (if needed later):
-  - VPC CIDR: 10.0.0.0/16
-  - Public subnets for NAT/egress; private subnets for Lambdas requiring VPC access
-  - Security Groups and NACLs configured on least-privilege basis
+## 🚀 Quick Start
 
-## 5) End-to-End Workflow
-
-1. User navigates to app URL (CloudFront distribution domain or Route 53 custom domain).
-2. CloudFront serves cached static assets from edge, fetching from S3 origin via OAC when needed.
-3. SPA renders and calls backend API endpoints (e.g., /prod/todos) via API Gateway over HTTPS.
-4. API Gateway invokes Lambda CRUD functions.
-5. Lambda reads/writes items in DynamoDB (Tasks table) and returns JSON responses.
-6. Responses return via API Gateway/CloudFront to the client. Logs and metrics are captured in CloudWatch.
-
-## Deliverables for Week 1
-
-- docs/architecture/Week1-ToDo-Architecture.drawio — diagram source (serverless‑first)
-- docs/architecture/Week1-ToDo-Architecture.png — diagram export
-- README.md — this document
-- app/ — React scaffold (with mock API for local development)
-- backend/ — local Node/Express scaffold to simulate API while developing, preps for Lambda logic
-
-## Local Development
-
-Frontend (app/):
+### **Prerequisites**
 - Node.js >= 18
-- Commands:
-  - npm install
-  - npm run dev (local dev server)
+- AWS CLI configured
+- Terraform >= 1.0
 
-Backend mock (backend/):
-- Node.js >= 18
-- Commands:
-  - npm install
-  - npm start (runs Express on http://localhost:3000)
+### **Local Development**
 
-During Week 1/2, the frontend can use local state or mock API. In Week 3, switch to the real API Gateway + Lambda endpoint.
+1. **Start Backend (Mock API):**
+   ```bash
+   cd backend
+   npm install
+   npm start
+   # Runs on http://localhost:3000
+   ```
 
-## Next Steps (Week 2+ Preview)
+2. **Start Frontend:**
+   ```bash
+   cd app
+   npm install
+   npm run dev
+   # Runs on http://localhost:5173
+   ```
 
-- Implement IaC (Terraform/CloudFormation) for S3, CloudFront, API Gateway, Lambda, DynamoDB, IAM.
-- Add GitHub Actions for CI/CD.
-- Set up CloudWatch monitoring and alarms (Week 4).
-- Optional: Integrate Cognito for user auth to support user-specific task lists.
+### **Production Deployment**
+
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed instructions.
+
+**Quick Deploy:**
+```bash
+# 1. Deploy Infrastructure
+cd infra
+terraform init
+terraform apply
+
+# 2. Build & Deploy Frontend
+cd ../app
+npm run build
+aws s3 sync dist/ s3://todo-app-frontend-uy9fm47h/ --delete
+aws cloudfront create-invalidation --distribution-id EB7DDXZ4MYDUO --paths "/*"
+```
+
+---
+
+## 🌐 Live URLs
+
+- **Production App:** https://d2tjhu6fumjbf7.cloudfront.net
+- **API Endpoint:** https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod
+- **Local Frontend:** http://localhost:5173
+- **Local Backend:** http://localhost:3000
+
+---
+
+## 🎨 Design System
+
+### **Glassmorphism UI**
+- Semi-transparent frosted glass cards
+- Heavy backdrop blur (40px)
+- Subtle borders and shadows
+- Animated gradient background
+- Star sparkle effects
+
+### **iOS-Style Components**
+- Rounded inputs with focus glow
+- System blue buttons (#007AFF)
+- Segmented control filters
+- Smooth cubic-bezier transitions
+- Swipe gestures for mobile
+
+### **Typography**
+- **Font:** Inter/Roboto
+- **Title:** 32px, Bold
+- **Body:** 16px, Regular
+- High contrast white text
+
+### **Colors**
+- Background: Black with gradient overlay
+- Glass: `rgba(255, 255, 255, 0.1)`
+- Primary: System Blue (#007AFF)
+- Success: System Green (#34C759)
+- Danger: System Red (#FF3B30)
+
+---
+
+## 📡 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/todos` | Fetch all tasks |
+| POST | `/todos` | Create new task |
+| PUT | `/todos/{id}/toggle` | Toggle completion |
+| DELETE | `/todos/{id}` | Delete task |
+
+**Base URL:** `https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod`
+
+---
+
+## 🔒 Security
+
+- ✅ HTTPS enforced on CloudFront
+- ✅ S3 access restricted to CloudFront (OAC)
+- ✅ IAM roles with least privilege
+- ✅ CORS headers properly configured
+- ✅ No public S3 bucket access
+- ✅ Secure API Gateway endpoints
+
+---
+
+## 📊 AWS Resources
+
+| Resource | Name/ID | Purpose |
+|----------|---------|---------|
+| S3 Bucket | `todo-app-frontend-uy9fm47h` | Static hosting |
+| CloudFront | `EB7DDXZ4MYDUO` | CDN + HTTPS |
+| API Gateway | `xydj5lg2h6` | REST API |
+| Lambda | `todo-app-todo-api` | Backend logic |
+| DynamoDB | `todo-app-tasks` | Task storage |
+
+---
+
+## 🛠️ Development
+
+### **Tech Stack Details**
+
+**Frontend:**
+- React 18.3.1
+- TypeScript 5.6.3
+- Vite 5.4.8
+- Custom CSS (no frameworks)
+
+**Backend:**
+- Node.js 20.x
+- AWS SDK v2
+- DynamoDB DocumentClient
+
+**Infrastructure:**
+- Terraform
+- AWS Provider 5.100.0
+
+### **Build Commands**
+
+```bash
+# Development
+npm run dev
+
+# Production Build
+npm run build
+
+# Preview Production Build
+npm run preview
+```
+
+### **Environment Variables**
+
+No environment variables needed - API URL is hardcoded in `app/src/api.ts`:
+```typescript
+const BASE_URL = 'https://xydj5lg2h6.execute-api.us-east-1.amazonaws.com/prod';
+```
+
+---
+
+## 📚 Documentation
+
+- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Complete deployment instructions
+- **[TESTING_CHECKLIST.md](./TESTING_CHECKLIST.md)** - Testing procedures
+- **[FIXES_SUMMARY.md](./FIXES_SUMMARY.md)** - Technical fixes documentation
+- **[BEFORE_AFTER.md](./BEFORE_AFTER.md)** - Design comparison
+
+---
+
+## 🎯 Key Features Implemented
+
+### **iOS-Style Interactions**
+- ✅ Swipe to delete (mobile/touch)
+- ✅ Smooth animations (cubic-bezier)
+- ✅ Ripple effects on buttons
+- ✅ Checkmark bounce animation
+- ✅ Hover effects with elevation
+- ✅ Active state feedback
+
+### **Glassmorphism Design**
+- ✅ Frosted glass cards
+- ✅ Backdrop blur effects
+- ✅ Semi-transparent backgrounds
+- ✅ Glass reflection highlights
+- ✅ Animated gradient background
+- ✅ Star sparkle effects
+
+### **Error Handling**
+- ✅ Optimistic UI updates
+- ✅ Automatic rollback on failure
+- ✅ User-friendly error notifications
+- ✅ Network error handling
+- ✅ Loading states
+
+---
+
+## 🚧 Future Enhancements
+
+- [ ] User authentication (AWS Cognito)
+- [ ] User-specific task lists
+- [ ] Task categories/tags
+- [ ] Due dates and reminders
+- [ ] Bulk operations
+- [ ] PWA features (offline support)
+- [ ] Dark/light mode toggle
+- [ ] Task search functionality
+- [ ] Drag and drop reordering
+
+---
+
+## 📝 License
+
+This project is part of the AWS Scalable Web App Infrastructure course.
+
+---
+
+## 👤 Author
+
+Built as part of Month 3 Project - AWS Scalable Web App Infrastructure
+
+**Last Updated:** January 13, 2026  
+**Status:** ✅ Production Ready  
+**Version:** 2.0 (Custom CSS Glassmorphism)

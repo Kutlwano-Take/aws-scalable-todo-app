@@ -1,8 +1,12 @@
 # 🚀 To-Do List App - Deployment Guide
 
-## ✅ All Issues Fixed!
+## ✅ Current Status: Production Ready
 
-This guide documents all the fixes applied to make the app fully functional.
+**Latest Update:** January 13, 2026  
+**Design:** Custom CSS Glassmorphism with iOS-style interactions  
+**Tech Stack:** React + Vite, AWS Lambda + API Gateway + DynamoDB, S3 + CloudFront
+
+This guide documents the complete deployment process and all features.
 
 ---
 
@@ -252,15 +256,64 @@ export const removeTodo = async (id: string): Promise<void> => { ... }
 
 ---
 
+## 🎨 Current Design System
+
+### **Custom CSS Glassmorphism (No Tailwind)**
+- ✅ **Removed Tailwind CSS** - Using pure custom CSS
+- ✅ **Glassmorphism Effects** - Frosted glass with backdrop blur
+- ✅ **iOS-Style Components** - Native iOS design patterns
+- ✅ **Smooth Animations** - Cubic-bezier transitions
+- ✅ **Swipe to Delete** - Mobile gesture support
+- ✅ **Animated Background** - Gradient with star sparkles
+- ✅ **Focus Glow Effects** - Soft neon glow on inputs
+- ✅ **Bundle Size:** 8.5KB CSS (optimized)
+
+### **CSS Architecture**
+- Pure CSS (no framework dependencies)
+- Custom classes for all components
+- iOS-style animations and transitions
+- Responsive design with mobile-first approach
+- GPU-accelerated animations
+
+### **Key CSS Files**
+- `app/src/index.css` - Complete custom CSS (657 lines)
+- No Tailwind, PostCSS, or build-time CSS processing
+- Direct CSS imports in components
+
 ## 🎯 Performance Optimizations
 
 - CloudFront CDN for global edge caching
 - DynamoDB on-demand billing (cost-effective)
 - Vite build optimization and code splitting
-- Gzip compression enabled (47KB gzipped JS)
+- Gzip compression enabled (48KB gzipped JS, 2.4KB CSS)
 - Optimistic UI updates for instant feedback
+- Custom CSS (smaller bundle than Tailwind)
 
 ---
+
+## 🎨 Design Features
+
+### **Glassmorphism UI**
+- Frosted glass cards with 40px backdrop blur
+- Semi-transparent backgrounds (rgba(255, 255, 255, 0.1))
+- Subtle borders and shadows
+- Glass reflection effects
+- Animated gradient background
+
+### **iOS-Style Interactions**
+- Swipe to delete (left swipe on mobile)
+- Smooth cubic-bezier animations
+- Button ripple effects
+- Checkmark bounce animation
+- Hover elevation effects
+- Active state feedback
+
+### **Visual Effects**
+- Animated gradient background (15s loop)
+- Star sparkle effects (30 stars)
+- Input focus glow
+- Task hover effects
+- Smooth transitions (200-300ms)
 
 ## 🐛 Known Limitations
 
@@ -268,6 +321,7 @@ export const removeTodo = async (id: string): Promise<void> => { ... }
 2. **Single User** - All users share the same task list
 3. **No Pagination** - All tasks load at once (fine for small lists)
 4. **Basic Error Messages** - Could be more descriptive
+5. **Swipe Gesture** - Only works on touch devices (mobile/tablet)
 
 ---
 

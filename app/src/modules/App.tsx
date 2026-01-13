@@ -91,46 +91,47 @@ export default function App() {
   const activeCount = todos.filter(t => !t.completed).length;
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-black">
-      {/* Cosmic Gradient Background with Star Sparkles */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a2e] via-[#1a1a3e] to-[#2d1b4e]"></div>
-        {/* Star sparkles */}
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              opacity: Math.random() * 0.8 + 0.2
-            }}
-          ></div>
-        ))}
-      </div>
+    <div style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden', background: '#000000' }}>
+      {/* Glassmorphism Background */}
+      <div className="app-background"></div>
+      
+      {/* Star Sparkles */}
+      {[...Array(30)].map((_, i) => (
+        <div
+          key={i}
+          className="star"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 3}s`,
+            opacity: Math.random() * 0.6 + 0.2
+          }}
+        ></div>
+      ))}
 
       {/* Main Container */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
-        <div className="w-full max-w-2xl">
+      <div className="app-container">
+        <div className="app-wrapper">
           
           {/* Glassmorphism Main Card */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
-            
-            <div className="p-6 sm:p-8 space-y-6">
+          <div className="glass-card">
+            <div className="glass-card-content">
               
               {/* Title */}
-              <h1 className="text-[32px] font-bold text-white mb-2" style={{ fontFamily: 'Inter, Roboto, sans-serif' }}>
-                To-Do List
-              </h1>
+              <div>
+                <h1 className="app-title">To-Do List</h1>
+                <p className="app-subtitle">
+                  {todos.length > 0 ? `${completedCount} of ${todos.length} completed` : 'Get things done'}
+                </p>
+              </div>
 
               {/* Error Notification */}
               {error && (
-                <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm flex items-center gap-3 animate-slideDown backdrop-blur-sm">
-                  <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <div className="error-notification">
+                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
-                  <span className="flex-1 font-medium">{error}</span>
+                  <span>{error}</span>
                 </div>
               )}
 
@@ -138,11 +139,11 @@ export default function App() {
               <NewTodo onAdd={handleAdd} />
 
               {/* Task List */}
-              <div className="min-h-[300px]">
+              <div style={{ minHeight: '300px' }}>
                 {loading ? (
-                  <div className="flex flex-col items-center justify-center py-16">
-                    <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
-                    <p className="text-white/60 mt-4 text-sm">Loading...</p>
+                  <div className="loading-container">
+                    <div className="loading-spinner"></div>
+                    <p className="loading-text">Loading your tasks...</p>
                   </div>
                 ) : (
                   <TodoList items={filteredTodos} onToggle={handleToggle} onRemove={handleRemove} />
@@ -151,19 +152,18 @@ export default function App() {
 
               {/* Footer with Filters and Counter */}
               {todos.length > 0 && (
-                <div className="pt-4 border-t border-white/10 space-y-4">
+                <div className="app-footer">
                   {/* Task Counter and Clear Button */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/60 text-sm" style={{ fontFamily: 'Inter, Roboto, sans-serif', fontSize: '16px' }}>
+                  <div className="footer-row">
+                    <span className="task-counter">
                       {activeCount} {activeCount === 1 ? 'item' : 'items'} left
                     </span>
                     {completedCount > 0 && (
                       <button
                         onClick={() => {
-                          completedTodos.forEach(todo => onRemove(todo.id));
+                          completedTodos.forEach(todo => handleRemove(todo.id));
                         }}
-                        className="text-white/60 hover:text-white text-sm transition-colors"
-                        style={{ fontFamily: 'Inter, Roboto, sans-serif', fontSize: '16px' }}
+                        className="clear-button"
                       >
                         Clear completed
                       </button>
