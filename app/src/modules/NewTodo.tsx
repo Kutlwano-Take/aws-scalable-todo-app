@@ -7,7 +7,7 @@ export function NewTodo({ onAdd }: { onAdd: (title: string) => void }) {
     e.preventDefault()
     if (title.trim()) {
       onAdd(title.trim())
-      setTitle('')
+    setTitle('')
     }
   }
 

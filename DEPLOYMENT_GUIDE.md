@@ -1,434 +1,260 @@
-# 🚀 To-Do List App - Deployment Guide
+# Deployment Guide
 
-## ✅ Current Status: Production Ready
+This guide provides step-by-step instructions for deploying the To-Do List application to AWS infrastructure.
 
-**Latest Update:** January 13, 2026  
-**Design:** Custom CSS Glassmorphism with iOS-style interactions  
-**Tech Stack:** React + Vite, AWS Lambda + API Gateway + DynamoDB, S3 + CloudFront
+**Last Updated:** January 14, 2026  
+**Status:** Production Ready  
+**Design:** Custom CSS Glassmorphism with iOS-style interactions
 
-This guide documents the complete deployment process and all features.
+## Prerequisites
 
----
+- AWS Account with appropriate permissions
+- AWS CLI installed and configured
+- Terraform installed (version 1.5+)
+- Node.js and npm installed
+- Git installed
 
-## 🔧 Issues Fixed
+## Initial Setup
 
-### 1. **Lambda Function - Missing Toggle & Delete Endpoints** ✅
-**Problem:** Backend only supported GET and POST, missing PUT (toggle) and DELETE endpoints.
+### 1. Configure AWS Credentials
 
-**Solution:** Updated `infra/lambda/index.js` to include:
-- `PUT /todos/{id}/toggle` - Toggle task completion status
-- `DELETE /todos/{id}` - Delete a task
-- `OPTIONS` handler for CORS preflight requests
+Create an IAM user with AdministratorAccess (or appropriate permissions) and configure AWS CLI:
 
-**Code Changes:**
-```javascript
-// Toggle endpoint - gets current state, flips completed flag
-const toggleMatch = path.match(/^\/todos\/([^\/]+)\/toggle$/);
-if (toggleMatch && httpMethod === 'PUT') { ... }
-
-// Delete endpoint - removes task from DynamoDB
-const deleteMatch = path.match(/^\/todos\/([^\/]+)$/);
-if (deleteMatch && httpMethod === 'DELETE') { ... }
+```bash
+aws configure --profile your-profile-name
 ```
 
----
+Enter your Access Key ID, Secret Access Key, default region (e.g., `eu-north-1`), and output format (`json`).
 
-### 2. **API Gateway - Missing Proxy Routes** ✅
-**Problem:** API Gateway only had routes for `/todos`, not `/todos/{id}` or `/todos/{id}/toggle`.
+### 2. Clone Repository
 
-**Solution:** Added proxy resource in `infra/main.tf`:
-```hcl
-resource "aws_api_gateway_resource" "todos_proxy" {
-  rest_api_id = aws_api_gateway_rest_api.todo_api.id
-  parent_id   = aws_api_gateway_resource.todos.id
-  path_part   = "{proxy+}"
-}
+```bash
+git clone https://github.com/Kutlwano-Take/aws-scalable-todo-app.git
+cd aws-scalable-todo-app
 ```
 
-This enables all paths like:
-- `/todos/123` (DELETE)
-- `/todos/123/toggle` (PUT)
-- `/todos/123/anything` (future endpoints)
+## Deployment Steps
 
----
+### Backend Deployment (Lambda + API Gateway + DynamoDB)
 
-### 3. **Frontend - Wrong Property Name Bug** ✅
-**Problem:** `TodoList.tsx` used `t.title` but backend returns `t.text`.
-
-**Solution:** Changed all instances in `app/src/modules/TodoList.tsx`:
-```tsx
-// Before: <span>{t.title}</span>
-// After:  <span>{t.text}</span>
-```
-
----
-
-### 4. **Frontend - Poor Error Handling** ✅
-**Problem:** Toggle and delete operations didn't await API calls or rollback on failure.
-
-**Solution:** Updated `app/src/modules/App.tsx`:
-
-**Before:**
-```tsx
-const handleToggle = (id: string) => {
-  setTodos((prev) => prev.map(...));
-  toggleTodo(id); 
-};
-```
-
-**After:**
-```tsx
-const handleToggle = async (id: string) => {
-  const previousTodos = [...todos];
-  setTodos((prev) => prev.map(...)); 
-  
-  try {
-    await toggleTodo(id);
-  } catch (err) {
-    setTodos(previousTodos); 
-    setError("Failed to update task.");
-  }
-};
-```
-
----
-
-### 5. **Frontend - No User Error Feedback** ✅
-**Problem:** Errors only logged to console, no visible user feedback.
-
-**Solution:** Added error state and notification UI:
-```tsx
-const [error, setError] = useState<string | null>(null);
-
-// In JSX:
-{error && (
-  <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg">
-    ⚠️ {error}
-  </div>
-)}
-```
-
-Errors auto-dismiss after 3 seconds.
-
----
-
-### 6. **TypeScript - Missing Type Definitions** ✅
-**Problem:** `types.ts` was empty, types scattered across files.
-
-**Solution:** Centralized types in `app/src/modules/types.ts`:
-```typescript
-export type Filter = 'all' | 'active' | 'completed';
-
-export interface Todo {
-  id: string;
-  text: string;
-  completed: boolean;
-  createdAt: string;
-}
-```
-
-Updated all imports to use centralized types.
-
----
-
-### 7. **API Layer - Weak TypeScript Types** ✅
-**Problem:** API functions used `any` types and lacked proper return types.
-
-**Solution:** Updated `app/src/api.ts` with strict typing:
-```typescript
-export const listTodos = async (): Promise<Todo[]> => { ... }
-export const createTodo = async (text: string): Promise<Todo> => { ... }
-export const toggleTodo = async (id: string): Promise<Todo> => { ... }
-export const removeTodo = async (id: string): Promise<void> => { ... }
-```
-
----
-
-## 📦 Deployment Commands
-
-### **Backend (Lambda + API Gateway)**
-
-1. **Navigate to infra directory:**
-   ```powershell
-   cd C:\Users\kutlw\To-Do-List-App\infra
+1. Navigate to infrastructure directory:
+   ```bash
+   cd infra
    ```
 
-2. **Install Lambda dependencies:**
-   ```powershell
+2. Install Lambda dependencies:
+   ```bash
    cd lambda
    npm install
    cd ..
    ```
 
-3. **Create deployment package:**
-   ```powershell
+3. Create Lambda deployment package:
+   ```bash
+   # Windows PowerShell
    Remove-Item -Force lambda.zip -ErrorAction SilentlyContinue
    Compress-Archive -Path .\lambda\* -DestinationPath lambda.zip
-   ```
-
-4. **Apply Terraform changes:**
-   ```powershell
-   terraform apply -auto-approve
-   ```
-
-5. **Deploy API Gateway (to activate new routes):**
-   ```powershell
-  
-   aws apigateway create-deployment --rest-api-id {your-api-id} --stage-name prod --region us-east-1
-   ```
    
-   **Note:** Replace `{your-api-id}` with your actual API Gateway ID from Terraform outputs.
-
----
-
-### **Frontend (React + S3 + CloudFront)**
-
-1. **Navigate to app directory:**
-   ```powershell
-   cd C:\Users\kutlw\To-Do-List-App\app
+   # Linux/Mac
+   zip -r lambda.zip lambda/*
    ```
 
-2. **Install dependencies (if needed):**
-   ```powershell
+4. Initialize Terraform:
+   ```bash
+   terraform init
+   ```
+
+5. Review deployment plan:
+   ```bash
+   terraform plan
+   ```
+
+6. Deploy infrastructure:
+   ```bash
+   terraform apply
+   ```
+
+   Type `yes` when prompted, or use `-auto-approve` flag.
+
+7. Get deployment outputs:
+   ```bash
+   terraform output
+   ```
+
+   Save these values:
+   - `api_gateway_url` - Your API endpoint
+   - `api_key` - API key for authentication (sensitive)
+   - `cloudfront_domain` - Your CloudFront URL
+   - `s3_bucket_name` - S3 bucket name
+   - `cloudfront_distribution_id` - CloudFront distribution ID
+
+### Frontend Deployment (React + S3 + CloudFront)
+
+1. Navigate to app directory:
+   ```bash
+   cd ../app
+   ```
+
+2. Install dependencies:
+   ```bash
    npm install
    ```
 
-3. **Configure API URL (if not using default):**
-   ```powershell
-
-   echo "VITE_API_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/prod" > .env
+3. Configure environment variables:
+   ```bash
+   # Create .env file
+   echo "VITE_API_URL=https://your-api-id.execute-api.region.amazonaws.com/prod" > .env
+   echo "VITE_API_KEY=your-api-key-here" >> .env
    ```
-   
-   **Note:** For production builds, the API URL can also be set via environment variable during build:
-   ```powershell
-   $env:VITE_API_URL="https://your-api-id.execute-api.us-east-1.amazonaws.com/prod"
+
+   Replace `your-api-id` and `your-api-key-here` with values from Terraform outputs.
+
+4. Build production bundle:
+   ```bash
    npm run build
    ```
 
-4. **Build production bundle:**
-   ```powershell
-   npm run build
+   This creates a `dist/` directory with optimized production files.
+
+5. Upload to S3:
+   ```bash
+   aws s3 sync dist/ s3://your-bucket-name/ --delete --profile your-profile-name
    ```
 
-5. **Upload to S3:**
-   ```powershell
-   aws s3 sync dist/ s3://todo-app-frontend-uy9fm47h/ --delete
+   Replace `your-bucket-name` with the S3 bucket name from Terraform outputs.
+
+6. Invalidate CloudFront cache:
+   ```bash
+   aws cloudfront create-invalidation --distribution-id your-distribution-id --paths "/*" --profile your-profile-name
    ```
 
-6. **Invalidate CloudFront cache:**
-   ```powershell
-   aws cloudfront create-invalidation --distribution-id EB7DDXZ4MYDUO --paths "/*"
-   ```
+   Replace `your-distribution-id` with the CloudFront distribution ID from Terraform outputs.
 
----
+## Post-Deployment
 
-## 🌐 Live URLs
+### Verify Deployment
 
-- **Production App:** https://d2tjhu6fumjbf7.cloudfront.net
-- **API Endpoint:** `https://{your-api-id}.execute-api.us-east-1.amazonaws.com/prod`
-  
-  **Note:** Replace `{your-api-id}` with your actual API Gateway ID. Get it from Terraform outputs or AWS Console.
-- **Local Frontend:** http://localhost:5173
-- **Local Backend:** http://localhost:3000
+1. Wait 5-15 minutes for CloudFront distribution to fully deploy
+2. Open your CloudFront URL in a browser
+3. Test creating, updating, and deleting tasks
+4. Verify tasks persist after page refresh
 
----
+### Environment Variables
 
-## 🧪 Testing the App
+The frontend requires two environment variables:
 
-### **Test All CRUD Operations:**
+- `VITE_API_URL`: Your API Gateway endpoint URL
+- `VITE_API_KEY`: Your API Gateway API key (for authentication)
 
-1. ✅ **Create Task:** Add a new task via input field
-2. ✅ **Read Tasks:** Tasks load from DynamoDB on page load
-3. ✅ **Toggle Task:** Click checkbox to mark complete/incomplete
-4. ✅ **Delete Task:** Click × button to remove task
-5. ✅ **Filter Tasks:** Use All/Active/Completed filters
+These are set in the `.env` file and embedded into the build at compile time.
 
-### **Test Error Handling:**
+## Security Configuration
 
-1. Turn off internet → Try adding task → See error notification
-2. Task should not appear if API call fails
-3. Toggle/delete should rollback if API call fails
+### API Key Authentication
 
----
+The API Gateway is protected with API key authentication. All requests must include the API key in the `x-api-key` header. The frontend automatically includes this header in all API requests.
 
-## 📊 AWS Resources
+### S3 Bucket Security
 
-| Resource | ID/Name | Purpose |
-|----------|---------|---------|
-| S3 Bucket | `todo-app-frontend-uy9fm47h` | Static hosting |
-| CloudFront | `EB7DDXZ4MYDUO` | CDN + HTTPS |
-| API Gateway | `{your-api-id}` | REST API (get from Terraform outputs) |
-| Lambda | `todo-app-todo-api` | Backend logic |
-| DynamoDB | `todo-app-tasks` | Persistent storage |
+- S3 bucket is private (no public access)
+- Access restricted to CloudFront via Origin Access Control (OAC)
+- HTTPS enforced through CloudFront
 
----
+### IAM Permissions
 
-## 📊 Monitoring & Alarms
+Lambda function uses IAM role with least privilege:
+- CloudWatch Logs access for logging
+- DynamoDB access limited to the tasks table only
 
-### **CloudWatch Alarms**
-- ✅ **Lambda Errors Alarm** - Triggers when errors > 5 in 5 minutes
-- ✅ **Lambda Duration Alarm** - Triggers when average duration > 5 seconds
-- ✅ **Log Groups** - 7-day retention for Lambda logs
-- ✅ **Metrics** - Automatic metrics for Lambda, API Gateway, DynamoDB
+## Monitoring
 
-### **Viewing Alarms:**
-```powershell
-# List alarms
-aws cloudwatch describe-alarms --alarm-name-prefix todo-app
+### CloudWatch Alarms
 
+The deployment includes CloudWatch alarms for:
+- Lambda errors (alerts when errors exceed 5 in 5 minutes)
+- Lambda duration (alerts when average duration exceeds 5 seconds)
+
+### Viewing Logs
+
+```bash
 # View Lambda logs
-aws logs tail /aws/lambda/todo-app-todo-api --follow --region us-east-1
+aws logs tail /aws/lambda/todo-app-todo-api --follow --profile your-profile-name
+
+# View API Gateway logs (if enabled)
+aws apigateway get-rest-apis --profile your-profile-name
 ```
 
-### **Budget Alerts (Optional)**
-Budget alerts can be configured in Terraform (commented out by default). Uncomment the `aws_budgets_budget` resource in `infra/main.tf` and set your email address.
+## Troubleshooting
 
----
+### CloudFront URL Not Working
 
-## 🔒 Security Features
+- Wait 5-15 minutes after deployment for CloudFront to propagate
+- Check CloudFront distribution status in AWS Console
+- Verify S3 bucket has files uploaded
+- Try accessing in incognito/private window
 
-✅ **HTTPS enforced** on CloudFront  
-✅ **S3 locked down** - only CloudFront can access (OAC)  
-✅ **CORS headers** properly configured  
-✅ **IAM roles** with least privilege  
-✅ **No hardcoded credentials**  
+### API Requests Failing
 
----
+- Verify API key is correctly set in `.env` file
+- Check API Gateway deployment status
+- Review Lambda function logs in CloudWatch
+- Verify DynamoDB table exists and is accessible
 
-## 🎨 Current Design System
+### Build Errors
 
-### **Custom CSS Glassmorphism (No Tailwind)**
-- ✅ **Removed Tailwind CSS** - Using pure custom CSS
-- ✅ **Glassmorphism Effects** - Frosted glass with backdrop blur
-- ✅ **iOS-Style Components** - Native iOS design patterns
-- ✅ **Smooth Animations** - Cubic-bezier transitions
-- ✅ **Swipe to Delete** - Mobile gesture support
-- ✅ **Animated Background** - Gradient with star sparkles
-- ✅ **Focus Glow Effects** - Soft neon glow on inputs
-- ✅ **Bundle Size:** 8.5KB CSS (optimized)
+- Ensure Node.js version is 18+ and npm is up to date
+- Delete `node_modules` and `package-lock.json`, then run `npm install` again
+- Check that all environment variables are set correctly
 
-### **CSS Architecture**
-- Pure CSS (no framework dependencies)
-- Custom classes for all components
-- iOS-style animations and transitions
-- Responsive design with mobile-first approach
-- GPU-accelerated animations
+## Updating the Application
 
-### **Key CSS Files**
-- `app/src/index.css` - Complete custom CSS (657 lines)
-- No Tailwind, PostCSS, or build-time CSS processing
-- Direct CSS imports in components
+### Update Backend
 
-## 🎯 Performance Optimizations
+1. Make changes to `infra/lambda/index.js`
+2. Recreate Lambda package: `Compress-Archive -Path .\lambda\* -DestinationPath lambda.zip`
+3. Run `terraform apply` to update Lambda function
 
-- CloudFront CDN for global edge caching
-- DynamoDB on-demand billing (cost-effective)
-- Vite build optimization and code splitting
-- Gzip compression enabled (48KB gzipped JS, 2.4KB CSS)
-- Optimistic UI updates for instant feedback
-- Custom CSS (smaller bundle than Tailwind)
+### Update Frontend
 
----
-
-## 🎨 Design Features
-
-### **Glassmorphism UI**
-- Frosted glass cards with 40px backdrop blur
-- Semi-transparent backgrounds (rgba(255, 255, 255, 0.1))
-- Subtle borders and shadows
-- Glass reflection effects
-- Animated gradient background
-
-### **iOS-Style Interactions**
-- Swipe to delete (left swipe on mobile)
-- Smooth cubic-bezier animations
-- Button ripple effects
-- Checkmark bounce animation
-- Hover elevation effects
-- Active state feedback
-
-### **Visual Effects**
-- Animated gradient background (15s loop)
-- Star sparkle effects (30 stars)
-- Input focus glow
-- Task hover effects
-- Smooth transitions (200-300ms)
-
-## 🐛 Known Limitations
-
-1. **No Authentication** - Anyone can access/modify tasks
-2. **Single User** - All users share the same task list
-3. **No Pagination** - All tasks load at once (fine for small lists)
-4. **Basic Error Messages** - Could be more descriptive
-5. **Swipe Gesture** - Only works on touch devices (mobile/tablet)
-
----
-
-## 🚀 Future Enhancements
-
-- [ ] Add AWS Cognito authentication
-- [ ] Implement user-specific task lists
-- [ ] Add task categories/tags
-- [ ] Due dates and reminders
-- [ ] Bulk operations (delete all completed)
-- [ ] Task search and sorting
-- [ ] PWA features (offline support)
-- [ ] Dark mode toggle
-- [ ] Task priority levels
-
----
-
-## 📝 Development Workflow
-
-### **Local Development:**
-
-1. Start backend:
-   ```powershell
-   cd backend
-   node server.js
-   ```
-
-2. Start frontend:
-   ```powershell
-   cd app
-   npm run dev
-   ```
-
-3. Open http://localhost:5173
-
-### **Deploy Changes:**
-
-1. Test locally
-2. Update Lambda code → Deploy backend
-3. Update React code → Deploy frontend
+1. Make changes to React components
+2. Rebuild: `npm run build`
+3. Upload to S3: `aws s3 sync dist/ s3://your-bucket/ --delete`
 4. Invalidate CloudFront cache
-5. Test production app
 
----
+## Cost Management
 
-## ✅ Project Status: COMPLETE
+This application is designed to stay within AWS Free Tier for typical usage. Monitor costs in AWS Billing Console:
 
-All core requirements met:
-- ✅ Modern React app with TypeScript
-- ✅ Serverless backend (Lambda + API Gateway)
-- ✅ Persistent storage (DynamoDB)
-- ✅ Secure hosting (S3 + CloudFront + HTTPS)
-- ✅ Infrastructure as Code (Terraform)
-- ✅ Full CRUD operations
-- ✅ Error handling and rollback
-- ✅ Responsive design
-- ✅ Production deployment
+- Set up billing alerts for unexpected charges
+- Review CloudWatch metrics regularly
+- Consider enabling AWS Budgets for cost tracking
 
----
+See [SECURITY_AND_MAINTENANCE.md](./SECURITY_AND_MAINTENANCE.md) for detailed cost monitoring setup and billing alert configuration.
 
-## 📞 Support
+## Cleanup
 
-For issues or questions, refer to:
-- AWS CloudWatch logs for Lambda errors
-- Browser DevTools console for frontend errors
-- Terraform state: `infra/terraform.tfstate`
+To remove all resources and stop incurring costs:
 
----
+```bash
+cd infra
+terraform destroy
+```
 
-**Last Updated:** January 12, 2026  
-**Status:** ✅ All systems operational
+Type `yes` when prompted. This will delete all AWS resources created by Terraform.
+
+## Post-Deployment Improvements
+
+After successful deployment, consider these enhancements:
+
+- **Custom Domain**: Add a custom domain using Route 53 and ACM (see [SECURITY_AND_MAINTENANCE.md](./SECURITY_AND_MAINTENANCE.md))
+- **IAM Security**: Restrict deployment user permissions (see [SECURITY_AND_MAINTENANCE.md](./SECURITY_AND_MAINTENANCE.md))
+- **Remote State**: Set up Terraform state in S3 with versioning (see [SECURITY_AND_MAINTENANCE.md](./SECURITY_AND_MAINTENANCE.md))
+- **Cost Monitoring**: Set up billing alerts and regular cost reviews
+
+## Additional Resources
+
+- [AWS Documentation](https://docs.aws.amazon.com/)
+- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+- [React Documentation](https://react.dev/)
+- [Vite Documentation](https://vitejs.dev/)
+- [Security and Maintenance Guide](./SECURITY_AND_MAINTENANCE.md)

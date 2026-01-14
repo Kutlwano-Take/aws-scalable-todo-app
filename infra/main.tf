@@ -225,6 +225,31 @@ resource "aws_api_gateway_rest_api" "todo_api" {
   description = "API for TODO app"
 }
 
+# API Key for securing the API
+resource "aws_api_gateway_api_key" "todo_api_key" {
+  name = "${var.project_name}-api-key"
+  description = "API key for TODO app frontend"
+  enabled = true
+}
+
+# Usage plan to associate API key with API
+resource "aws_api_gateway_usage_plan" "todo_usage_plan" {
+  name        = "${var.project_name}-usage-plan"
+  description = "Usage plan for TODO app"
+
+  api_stages {
+    api_id = aws_api_gateway_rest_api.todo_api.id
+    stage  = aws_api_gateway_deployment.prod.stage_name
+  }
+}
+
+# Associate API key with usage plan
+resource "aws_api_gateway_usage_plan_key" "todo_usage_plan_key" {
+  key_id        = aws_api_gateway_api_key.todo_api_key.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.todo_usage_plan.id
+}
+
 # Proxy resource for /todos
 resource "aws_api_gateway_resource" "todos" {
   rest_api_id = aws_api_gateway_rest_api.todo_api.id
@@ -238,6 +263,7 @@ resource "aws_api_gateway_method" "todos" {
   resource_id   = aws_api_gateway_resource.todos.id
   http_method   = "ANY"
   authorization = "NONE"
+  api_key_required = true
 }
 
 resource "aws_api_gateway_integration" "lambda" {
@@ -263,6 +289,7 @@ resource "aws_api_gateway_method" "todos_proxy" {
   resource_id   = aws_api_gateway_resource.todos_proxy.id
   http_method   = "ANY"
   authorization = "NONE"
+  api_key_required = true
 }
 
 resource "aws_api_gateway_integration" "lambda_proxy" {

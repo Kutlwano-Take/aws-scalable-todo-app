@@ -116,7 +116,7 @@ export default function App() {
           {/* Glassmorphism Main Card */}
           <div className="glass-card">
             <div className="glass-card-content">
-              
+
               {/* Title */}
               <div>
                 <h1 className="app-title">To-Do List</h1>
@@ -136,18 +136,18 @@ export default function App() {
               )}
 
               {/* Input Bar */}
-              <NewTodo onAdd={handleAdd} />
+        <NewTodo onAdd={handleAdd} />
 
               {/* Task List */}
               <div style={{ minHeight: '300px' }}>
-                {loading ? (
+        {loading ? (
                   <div className="loading-container">
                     <div className="loading-spinner"></div>
                     <p className="loading-text">Loading your tasks...</p>
                   </div>
-                ) : (
-                  <TodoList items={filteredTodos} onToggle={handleToggle} onRemove={handleRemove} />
-                )}
+        ) : (
+          <TodoList items={filteredTodos} onToggle={handleToggle} onRemove={handleRemove} />
+        )}
               </div>
 
               {/* Footer with Filters and Counter */}

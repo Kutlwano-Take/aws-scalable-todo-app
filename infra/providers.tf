@@ -9,5 +9,6 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"  # Best region for CloudFront + Free Tier
+  region  = "eu-north-1"  # Stockholm region
+  profile = "new-account" # Use the new AWS account profile
 }

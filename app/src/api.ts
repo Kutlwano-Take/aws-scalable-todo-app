@@ -1,11 +1,26 @@
 import type { Todo } from './modules/types';
 
-// Get API URL from environment variable, fallback to localhost for development
+
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_KEY = import.meta.env.VITE_API_KEY || '';
+
+
+const getHeaders = (includeContentType = false): HeadersInit => {
+  const headers: HeadersInit = {};
+  if (includeContentType) {
+    headers['Content-Type'] = 'application/json';
+  }
+  if (API_KEY) {
+    headers['x-api-key'] = API_KEY;
+  }
+  return headers;
+};
 
 export const listTodos = async (): Promise<Todo[]> => {
   try {
-    const res = await fetch(`${BASE_URL}/todos`);
+    const res = await fetch(`${BASE_URL}/todos`, {
+      headers: getHeaders()
+    });
     if (!res.ok) {
       console.error('GET /todos failed:', res.status, await res.text());
       return [];
@@ -28,7 +43,7 @@ export const createTodo = async (text: string): Promise<Todo> => {
   try {
     const res = await fetch(`${BASE_URL}/todos`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(true),
       body: JSON.stringify({ text, completed: false })
     });
     if (!res.ok) {
@@ -53,6 +68,7 @@ export const toggleTodo = async (id: string): Promise<Todo> => {
   try {
     const res = await fetch(`${BASE_URL}/todos/${id}/toggle`, {
       method: 'PUT',
+      headers: getHeaders()
     });
     if (!res.ok) {
       console.error('PUT /todos/:id/toggle failed:', res.status, await res.text());
@@ -71,6 +87,7 @@ export const removeTodo = async (id: string): Promise<void> => {
   try {
     const res = await fetch(`${BASE_URL}/todos/${id}`, {
       method: 'DELETE',
+      headers: getHeaders()
     });
     if (!res.ok) {
       console.error('DELETE /todos/:id failed:', res.status, await res.text());
