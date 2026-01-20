@@ -23,6 +23,8 @@ pnpm-debug.log*
 .terraform/
 *.tfstate
 *.tfstate.backup
+*.tfstate.backup.*
+terraform.tfstate.backup*
 *.tfvars
 .terraform.lock.hcl
 lambda.zip
