@@ -1,6 +1,6 @@
 # Security and Maintenance Guide
 
-This guide covers security best practices and maintenance tasks for the To-Do List application.
+This guide is a short, practical checklist for running this project safely.
 
 ## IAM Security
 
@@ -41,106 +41,32 @@ The policy does NOT allow:
 - Accessing resources outside the todo-app namespace
 - Billing or account management
 
+## What’s already secured in this project
+
+- CloudFront enforces HTTPS.
+- The S3 bucket is private and only CloudFront can read it (Origin Access Control).
+- API requests require an API key (`x-api-key`).
+- Lambda runs with a least-privilege IAM role (DynamoDB + CloudWatch Logs).
+- Budget alerts and CloudWatch alarms are enabled for basic ops safety.
+
 ## Custom Domain Setup (Optional)
 
-CloudFront URLs are long and hard to remember. You can add a custom domain using Route 53 and ACM.
+CloudFront URLs work fine for demos. If you want a nicer URL:
 
-### Prerequisites
-
-- A domain name registered (can use Route 53 or external registrar)
-- Access to DNS settings for your domain
-
-### Steps
-
-1. **Request SSL Certificate in ACM**
-   ```bash
-   # Request certificate in us-east-1 (required for CloudFront)
-   aws acm request-certificate \
-     --domain-name todo.yourdomain.com \
-     --validation-method DNS \
-     --region us-east-1 \
-     --profile your-profile
-   ```
-
-2. **Validate Certificate**
-   - Go to ACM Console → Certificates
-   - Copy the CNAME records provided
-   - Add them to your domain's DNS settings
-   - Wait for validation (usually 5-30 minutes)
-
-3. **Update CloudFront Distribution**
-   - Go to CloudFront Console → Your Distribution
-   - Edit → Alternate Domain Names (CNAMEs)
-   - Add: `todo.yourdomain.com`
-   - SSL Certificate: Select your ACM certificate
-   - Save changes
-
-4. **Update Route 53 Record**
-   - Go to Route 53 → Hosted Zones → Your Domain
-   - Create A record (Alias)
-   - Name: `todo`
-   - Alias: Yes → CloudFront distribution
-   - Select your CloudFront distribution
-   - Save
-
-5. **Wait for Propagation**
-   - DNS changes can take up to 48 hours (usually much faster)
-   - Test with: `curl -I https://todo.yourdomain.com`
-
-### Terraform Configuration (Optional)
-
-You can automate this with Terraform by adding:
-
-```hcl
-# ACM Certificate
-resource "aws_acm_certificate" "todo_domain" {
-  domain_name       = "todo.yourdomain.com"
-  validation_method = "DNS"
-  provider          = aws.us_east_1  # CloudFront requires us-east-1
-}
-
-# CloudFront with custom domain
-resource "aws_cloudfront_distribution" "cdn" {
-  # ... existing configuration ...
-  
-  aliases = ["todo.yourdomain.com"]
-  
-  viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate.todo_domain.arn
-    ssl_support_method       = "sni-only"
-    minimum_protocol_version = "TLSv1.2_2021"
-  }
-}
-```
+- Buy/own a domain
+- Request an ACM certificate (CloudFront requires the cert in `us-east-1`)
+- Attach the domain + certificate to CloudFront
+- Create a Route 53 alias record to the CloudFront distribution
 
 ## Cost Monitoring
 
-### Setting Up Billing Alerts
+### Cost alerts
 
-1. **Enable Billing Alerts**
-   - Go to AWS Billing Console → Preferences
-   - Enable "Receive Billing Alerts"
+This project uses AWS Budgets for cost alerts (monthly threshold + email notifications).
 
-2. **Create CloudWatch Billing Alarm**
-   ```bash
-   aws cloudwatch put-metric-alarm \
-     --alarm-name todo-app-monthly-billing \
-     --alarm-description "Alert when monthly costs exceed $5" \
-     --metric-name EstimatedCharges \
-     --namespace AWS/Billing \
-     --statistic Maximum \
-     --period 86400 \
-     --evaluation-periods 1 \
-     --threshold 5 \
-     --comparison-operator GreaterThanThreshold \
-     --dimensions Name=Currency,Value=USD \
-     --profile your-profile
-   ```
-
-3. **Set Up SNS Topic for Alerts**
-   - Create SNS topic in AWS Console
-   - Subscribe your email to the topic
-   - Update the alarm to send to SNS topic
+Good habits:
+- Check Cost Explorer monthly
+- Keep an eye on CloudFront data transfer and API Gateway requests
 
 ### Regular Cost Review
 
@@ -160,87 +86,13 @@ For typical usage (100-1000 daily users):
 
 ### Setting Up Remote State with Versioning
 
-Currently using local state. For production, use S3 backend with versioning.
+Currently using local state. For teamwork or a “real” production workflow, move state to S3 and enable state locking.
 
-#### Step 1: Create State Bucket
+Recommended production setup:
 
-```bash
-# Create bucket for Terraform state
-aws s3api create-bucket \
-  --bucket todo-app-terraform-state-701742813629 \
-  --region eu-north-1 \
-  --create-bucket-configuration LocationConstraint=eu-north-1 \
-  --profile new-account
-
-# Enable versioning
-aws s3api put-bucket-versioning \
-  --bucket todo-app-terraform-state-701742813629 \
-  --versioning-configuration Status=Enabled \
-  --profile new-account
-
-# Enable encryption
-aws s3api put-bucket-encryption \
-  --bucket todo-app-terraform-state-701742813629 \
-  --server-side-encryption-configuration '{
-    "Rules": [{
-      "ApplyServerSideEncryptionByDefault": {
-        "SSEAlgorithm": "AES256"
-      }
-    }]
-  }' \
-  --profile new-account
-
-# Block public access
-aws s3api put-public-access-block \
-  --bucket todo-app-terraform-state-701742813629 \
-  --public-access-block-configuration \
-    "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true" \
-  --profile new-account
-```
-
-#### Step 2: Create DynamoDB Table for Locking
-
-```bash
-aws dynamodb create-table \
-  --table-name todo-app-terraform-locks \
-  --attribute-definitions AttributeName=LockID,AttributeType=S \
-  --key-schema AttributeName=LockID,KeyType=HASH \
-  --billing-mode PAY_PER_REQUEST \
-  --region eu-north-1 \
-  --profile new-account
-```
-
-#### Step 3: Update Terraform Configuration
-
-Add to `infra/providers.tf`:
-
-```hcl
-terraform {
-  required_version = ">= 1.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-  
-  backend "s3" {
-    bucket         = "todo-app-terraform-state-701742813629"
-    key            = "todo-app/terraform.tfstate"
-    region         = "eu-north-1"
-    dynamodb_table = "todo-app-terraform-locks"
-    encrypt        = true
-    profile        = "new-account"
-  }
-}
-```
-
-#### Step 4: Migrate State
-
-```bash
-cd infra
-terraform init -migrate-state
-```
+- S3 bucket for state (versioning + encryption + block public access)
+- DynamoDB table for state locking
+- Terraform backend configured to use them
 
 This will migrate your local state to S3.
 

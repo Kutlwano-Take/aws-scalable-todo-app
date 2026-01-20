@@ -1,95 +1,43 @@
-import React, { useState, useRef, useEffect } from 'react'
-import type { Todo } from './types'
+import React from "react";
+import type { Todo } from "../api";
 
-export function TodoList({ items, onToggle, onRemove }: {
-  items: Todo[]
-  onToggle: (id: string) => void
-  onRemove: (id: string) => void
+export function TodoList({
+  items,
+  onToggle,
+  onRemove,
+}: {
+  items: Todo[];
+  onToggle: (id: string) => void;
+  onRemove: (id: string) => void;
 }) {
-  const [swipedId, setSwipedId] = useState<string | null>(null);
-  const [swipeOffset, setSwipeOffset] = useState<{ [key: string]: number }>({});
-  const touchStartX = useRef<{ [key: string]: number }>({});
-  const touchStartTime = useRef<{ [key: string]: number }>({});
-
-  const handleTouchStart = (e: React.TouchEvent, id: string) => {
-    touchStartX.current[id] = e.touches[0].clientX;
-    touchStartTime.current[id] = Date.now();
-  };
-
-  const handleTouchMove = (e: React.TouchEvent, id: string) => {
-    const currentX = e.touches[0].clientX;
-    const diff = currentX - touchStartX.current[id];
-    
-    if (diff < 0) {
-      setSwipeOffset(prev => ({ ...prev, [id]: Math.max(diff, -80) }));
-      setSwipedId(id);
-    }
-  };
-
-  const handleTouchEnd = (id: string) => {
-    const offset = swipeOffset[id] || 0;
-    const timeDiff = Date.now() - touchStartTime.current[id];
-    
-    if (offset < -50 || (offset < -30 && timeDiff < 200)) {
-      // Swipe to delete
-      onRemove(id);
-    }
-    
-    setSwipeOffset(prev => ({ ...prev, [id]: 0 }));
-    setSwipedId(null);
-  };
-
-  // Reset swipe when items change
-  useEffect(() => {
-    setSwipeOffset({});
-    setSwipedId(null);
-  }, [items]);
-
   if (items.length === 0) {
-    return (
-      <div className="empty-state">
-        <p>No tasks yet. Add one above! ✨</p>
-      </div>
-    )
+    return <p className="text-gray-400 italic text-center py-4">No tasks yet</p>;
   }
 
   return (
-    <ul className="task-list">
-      {items.map((t, index) => (
-        <li 
-          key={t.id} 
-          className={`task-item ${t.completed ? 'completed' : ''} ${swipedId === t.id ? 'swiping' : ''}`}
-          style={{ 
-            animationDelay: `${index * 50}ms`,
-            transform: `translateX(${swipeOffset[t.id] || 0}px)`,
-            transition: swipeOffset[t.id] ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-          }}
-          onTouchStart={(e) => handleTouchStart(e, t.id)}
-          onTouchMove={(e) => handleTouchMove(e, t.id)}
-          onTouchEnd={() => handleTouchEnd(t.id)}
+    <div className="space-y-3">
+      {items.map((t) => (
+        <div
+          key={t.id}
+          className={`flex items-center gap-4 bg-black/30 border border-white/10 rounded-xl px-5 py-4 ${
+            t.completed ? "opacity-60 line-through" : ""
+          }`}
         >
-          <input 
-            type="checkbox" 
-            checked={t.completed} 
+          <input
+            type="checkbox"
+            checked={t.completed}
             onChange={() => onToggle(t.id)}
-            className="task-checkbox"
+            className="w-5 h-5 accent-purple-500"
           />
-          
-          <span className="task-text">
-            {t.text}
-          </span>
-
-          <button 
+          <span className="flex-1 text-white text-lg">{t.text}</span>
+          <button
             onClick={() => onRemove(t.id)}
-            aria-label={`Remove ${t.text}`}
-            className="task-delete"
+            className="text-red-400 hover:text-red-300 text-xl"
           >
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            ✕
           </button>
-        </li>
+        </div>
       ))}
-    </ul>
-  )
+    </div>
+  );
 }

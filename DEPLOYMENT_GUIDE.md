@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide provides step-by-step instructions for deploying the To-Do List application to AWS infrastructure.
+This guide walks you through deploying the To-Do List app to AWS.
 
 **Last Updated:** January 14, 2026  
 **Status:** Production Ready  
@@ -13,25 +13,6 @@ This guide provides step-by-step instructions for deploying the To-Do List appli
 - Terraform installed (version 1.5+)
 - Node.js and npm installed
 - Git installed
-
-## Initial Setup
-
-### 1. Configure AWS Credentials
-
-Create an IAM user with AdministratorAccess (or appropriate permissions) and configure AWS CLI:
-
-```bash
-aws configure --profile your-profile-name
-```
-
-Enter your Access Key ID, Secret Access Key, default region (e.g., `eu-north-1`), and output format (`json`).
-
-### 2. Clone Repository
-
-```bash
-git clone https://github.com/Kutlwano-Take/aws-scalable-todo-app.git
-cd aws-scalable-todo-app
-```
 
 ## Deployment Steps
 
@@ -81,12 +62,12 @@ cd aws-scalable-todo-app
    terraform output
    ```
 
-   Save these values:
-   - `api_gateway_url` - Your API endpoint
-   - `api_key` - API key for authentication (sensitive)
-   - `cloudfront_domain` - Your CloudFront URL
-   - `s3_bucket_name` - S3 bucket name
-   - `cloudfront_distribution_id` - CloudFront distribution ID
+   You’ll use these outputs for the frontend:
+   - `api_gateway_url`
+   - `api_key` (sensitive)
+   - `cloudfront_url`
+   - `s3_bucket_name`
+   - `cloudfront_distribution_id`
 
 ### Frontend Deployment (React + S3 + CloudFront)
 
@@ -139,51 +120,6 @@ cd aws-scalable-todo-app
 3. Test creating, updating, and deleting tasks
 4. Verify tasks persist after page refresh
 
-### Environment Variables
-
-The frontend requires two environment variables:
-
-- `VITE_API_URL`: Your API Gateway endpoint URL
-- `VITE_API_KEY`: Your API Gateway API key (for authentication)
-
-These are set in the `.env` file and embedded into the build at compile time.
-
-## Security Configuration
-
-### API Key Authentication
-
-The API Gateway is protected with API key authentication. All requests must include the API key in the `x-api-key` header. The frontend automatically includes this header in all API requests.
-
-### S3 Bucket Security
-
-- S3 bucket is private (no public access)
-- Access restricted to CloudFront via Origin Access Control (OAC)
-- HTTPS enforced through CloudFront
-
-### IAM Permissions
-
-Lambda function uses IAM role with least privilege:
-- CloudWatch Logs access for logging
-- DynamoDB access limited to the tasks table only
-
-## Monitoring
-
-### CloudWatch Alarms
-
-The deployment includes CloudWatch alarms for:
-- Lambda errors (alerts when errors exceed 5 in 5 minutes)
-- Lambda duration (alerts when average duration exceeds 5 seconds)
-
-### Viewing Logs
-
-```bash
-# View Lambda logs
-aws logs tail /aws/lambda/todo-app-todo-api --follow --profile your-profile-name
-
-# View API Gateway logs (if enabled)
-aws apigateway get-rest-apis --profile your-profile-name
-```
-
 ## Troubleshooting
 
 ### CloudFront URL Not Working
@@ -203,7 +139,7 @@ aws apigateway get-rest-apis --profile your-profile-name
 ### Build Errors
 
 - Ensure Node.js version is 18+ and npm is up to date
-- Delete `node_modules` and `package-lock.json`, then run `npm install` again
+- Delete `node_modules` and run `npm install` again
 - Check that all environment variables are set correctly
 
 ## Updating the Application
@@ -223,11 +159,11 @@ aws apigateway get-rest-apis --profile your-profile-name
 
 ## Cost Management
 
-This application is designed to stay within AWS Free Tier for typical usage. Monitor costs in AWS Billing Console:
+This application is designed to stay within AWS Free Tier for typical usage. Still, keep an eye on costs:
 
 - Set up billing alerts for unexpected charges
 - Review CloudWatch metrics regularly
-- Consider enabling AWS Budgets for cost tracking
+- AWS Budgets can alert you when spend crosses a threshold
 
 See [SECURITY_AND_MAINTENANCE.md](./SECURITY_AND_MAINTENANCE.md) for detailed cost monitoring setup and billing alert configuration.
 

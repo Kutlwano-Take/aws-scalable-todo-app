@@ -344,6 +344,17 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
   retention_in_days = 7
 }
 
+# SNS Topic for Alarm Notifications
+resource "aws_sns_topic" "alarm_notifications" {
+  name = "${var.project_name}-alarm-notifications"
+}
+
+resource "aws_sns_topic_subscription" "alarm_email" {
+  topic_arn = aws_sns_topic.alarm_notifications.arn
+  protocol  = "email"
+  endpoint  = var.alert_email
+}
+
 # CloudWatch Alarm: Lambda Errors > 5
 resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   alarm_name          = "${var.project_name}-lambda-errors"
@@ -355,7 +366,8 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   statistic           = "Sum"
   threshold           = 5
   alarm_description   = "This metric monitors lambda errors"
-  alarm_actions       = []
+  alarm_actions       = [aws_sns_topic.alarm_notifications.arn]
+  ok_actions          = [aws_sns_topic.alarm_notifications.arn]
 
   dimensions = {
     FunctionName = aws_lambda_function.todo_api.function_name
@@ -378,7 +390,8 @@ resource "aws_cloudwatch_metric_alarm" "lambda_duration" {
   statistic           = "Average"
   threshold           = 5000
   alarm_description   = "This metric monitors lambda duration"
-  alarm_actions       = []
+  alarm_actions       = [aws_sns_topic.alarm_notifications.arn]
+  ok_actions          = [aws_sns_topic.alarm_notifications.arn]
 
   dimensions = {
     FunctionName = aws_lambda_function.todo_api.function_name
@@ -390,23 +403,104 @@ resource "aws_cloudwatch_metric_alarm" "lambda_duration" {
   }
 }
 
-# Budget Alert (optional - uncomment if needed)
-# resource "aws_budgets_budget" "monthly_budget" {
-#   name              = "${var.project_name}-monthly-budget"
-#   budget_type       = "COST"
-#   limit_amount      = "5.00"
-#   limit_unit        = "USD"
-#   time_period_start = "2024-01-01_00:00"
-#   time_unit         = "MONTHLY"
-#
-#   notification {
-#     comparison_operator        = "GREATER_THAN"
-#     threshold                  = 80
-#     threshold_type            = "PERCENTAGE"
-#     notification_type         = "ACTUAL"
-#     subscriber_email_addresses = ["your-email@example.com"]
-#   }
-# }
+resource "aws_cloudwatch_dashboard" "main" {
+  dashboard_name = "${var.project_name}-dashboard"
+
+  dashboard_body = jsonencode({
+    widgets = [
+      {
+        type = "metric"
+        x    = 0
+        y    = 0
+        width  = 12
+        height = 6
+        properties = {
+          title  = "Lambda Errors (Sum)"
+          region = "eu-north-1"
+          stat   = "Sum"
+          period = 300
+          metrics = [
+            ["AWS/Lambda", "Errors", "FunctionName", aws_lambda_function.todo_api.function_name]
+          ]
+        }
+      },
+      {
+        type = "metric"
+        x    = 12
+        y    = 0
+        width  = 12
+        height = 6
+        properties = {
+          title  = "Lambda Duration (Average)"
+          region = "eu-north-1"
+          stat   = "Average"
+          period = 300
+          metrics = [
+            ["AWS/Lambda", "Duration", "FunctionName", aws_lambda_function.todo_api.function_name]
+          ]
+        }
+      },
+      {
+        type = "metric"
+        x    = 0
+        y    = 6
+        width  = 12
+        height = 6
+        properties = {
+          title  = "API Gateway 5XX (Sum)"
+          region = "eu-north-1"
+          stat   = "Sum"
+          period = 300
+          metrics = [
+            ["AWS/ApiGateway", "5XXError", "ApiName", aws_api_gateway_rest_api.todo_api.name, "Stage", aws_api_gateway_deployment.prod.stage_name]
+          ]
+        }
+      },
+      {
+        type = "metric"
+        x    = 12
+        y    = 6
+        width  = 12
+        height = 6
+        properties = {
+          title  = "DynamoDB Read/Write (Sum)"
+          region = "eu-north-1"
+          stat   = "Sum"
+          period = 300
+          metrics = [
+            ["AWS/DynamoDB", "ConsumedReadCapacityUnits", "TableName", aws_dynamodb_table.tasks.name],
+            ["AWS/DynamoDB", "ConsumedWriteCapacityUnits", "TableName", aws_dynamodb_table.tasks.name]
+          ]
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_budgets_budget" "monthly_budget" {
+  name              = "${var.project_name}-monthly-budget"
+  budget_type       = "COST"
+  limit_amount      = var.monthly_budget_limit_usd
+  limit_unit        = "USD"
+  time_period_start = "2024-01-01_00:00"
+  time_unit         = "MONTHLY"
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 80
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [var.alert_email]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 100
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "FORECASTED"
+    subscriber_email_addresses = [var.alert_email]
+  }
+}
 
 # Output API Gateway URL
 output "api_gateway_url" {

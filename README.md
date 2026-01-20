@@ -1,22 +1,23 @@
 # AWS Scalable To-Do List App
 
-A production-ready, full-stack serverless To-Do List application built with React and deployed on AWS infrastructure. Features a modern glassmorphism UI design with iOS-style interactions and animations.
+A full-stack serverless To-Do List app deployed on AWS.
 
-**Live Demo:** [View App](https://dnz0gkceadoio.cloudfront.net) | **Documentation:** [App Description](./APP_DESCRIPTION.md) | **Deployment:** [Deployment Guide](./DEPLOYMENT_GUIDE.md)
+**Live Demo:** https://dnz0gkceadoio.cloudfront.net
+
+If you’re reviewing this for the Month 3 project: this repo shows a scalable AWS architecture, Infrastructure-as-Code (Terraform), monitoring + cost controls, and a simple CI/CD pipeline.
+
+**Docs:**
+- `DEPLOYMENT_GUIDE.md` (how to deploy)
+- `SECURITY_AND_MAINTENANCE.md` (security + ops notes)
+- `APP_DESCRIPTION.md` (short overview)
 
 ## Quick Start
 
 ### Local Development
 
 ```bash
-
 git clone https://github.com/Kutlwano-Take/aws-scalable-todo-app.git
 cd aws-scalable-todo-app
-
-
-cd backend && npm install && npm start
-
-
 
 cd app
 cp .env.example .env  # Copy example, edit with your API URL and API key
@@ -27,13 +28,10 @@ npm install && npm run dev
 ### Production Deployment
 
 ```bash
-# Deploy infrastructure
 cd infra
 terraform init && terraform apply
 
-
 terraform output -raw api_key
-
 
 cd ../app
 echo "VITE_API_URL=https://your-api-id.execute-api.region.amazonaws.com/prod" > .env
@@ -108,12 +106,19 @@ Beyond free tier, costs remain minimal for typical usage (under $5/month for 100
 ## Monitoring
 
 CloudWatch integration provides:
-- Lambda error logs and metrics
-- API Gateway request logs
-- CloudWatch alarms for Lambda errors
-- Budget alerts for cost monitoring
+- Logs for the Lambda function
+- Alarms for Lambda errors and performance
+- A CloudWatch dashboard for key metrics
+- AWS Budgets alerts for cost monitoring
 
 See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for monitoring setup details.
+
+## CI/CD
+
+This repo includes a simple GitHub Actions workflow that builds the frontend and deploys it to S3, then invalidates CloudFront.
+
+- Workflow: `.github/workflows/deploy-frontend.yml`
+- Runs on push to `main`
 
 ## Tech Stack
 
